@@ -1,0 +1,45 @@
+﻿@inherits SessionPlayerInfoBase
+
+@if (AuthState != null && GamePlayer.Username != AuthState.User.Identity.Name)
+{
+    <p>
+        PlayerInfo : <button @onclick="@Edit" class="btn btn-primary m-1 btn-sm">Edit info</button>
+    </p>
+}
+@if (GameInformation.PlayersNotes.FirstOrDefault(e => e.NotedPlayerName == GamePlayer.Username) != null)
+{
+    <p>@GameInformation.PlayersNotes.First(e => e.NotedPlayerName == GamePlayer.Username).Description</p>
+}
+<p>@GamePlayer.Username</p>
+@if (GamePlayer.IsPlaying)
+{
+    <p>@GamePlayer.ActionState</p>
+}
+else if (GamePlayer.IsReady)
+{
+    <p>Ready</p>
+}
+else
+{
+    <p>Not ready</p>
+}
+@if (GamePlayer.IsReady)
+{
+    <p>Money : @GamePlayer.GameMoney</p>
+}
+
+
+@if (GameInformation.Hand.Count > 0 && GamePlayer.IsPlaying)
+{
+    foreach (var card in GameInformation.Hand)
+    {
+        if (GamePlayer.Username == AuthState.User.Identity.Name)
+        {
+            <img style="height: 100px; width: auto" src="img/Cards/@string.Join("",card.CardNumber.ToString(),card.CardSuit.ToString(),".png")" alt="Error" />
+        }
+        else
+        {
+            <img style="height: 100px; width: auto" src="img/Cards/gray_back.png" alt="Error" />
+        }
+    }
+}

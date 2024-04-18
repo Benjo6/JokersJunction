@@ -1,0 +1,7 @@
+﻿@page "/"
+@inherits IndexBase
+@inject NavigationManager NavigationManager
+
+<AuthorizeView Roles="User">
+        <TableList/>
+</AuthorizeView>

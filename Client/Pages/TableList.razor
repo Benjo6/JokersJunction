@@ -1,0 +1,20 @@
+﻿@inherits TableListBase
+
+
+@if (PokerTables == null)
+{
+    <div class="spinner"></div>
+}
+else if (!PokerTables.Any())
+{
+    <p>There are no tables</p>
+}
+else
+{
+    <div class="card-deck">
+        @foreach (var table in PokerTables)
+        {
+            <DisplayTable Table="table" OnChange="UpdateHandler"></DisplayTable>
+        }
+    </div>
+}
