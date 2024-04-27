@@ -8,9 +8,6 @@ namespace JokersJunction.Client.Shared
 {
     public class NavMenuBase : ComponentBase
     {
-        public bool CollapseNavMenu { get; set; } = true;
-
-        protected string NavMenuCssClass => CollapseNavMenu ? "collapse" : null;
         [Inject] public IStateService StateService { get; set; }
 
         [Inject] public IModalService ModalService { get; set; }
@@ -79,10 +76,6 @@ namespace JokersJunction.Client.Shared
             {
                 await OnChange.InvokeAsync("Logout");
             }
-        }
-        protected void ToggleNavMenu()
-        {
-            CollapseNavMenu = !CollapseNavMenu;
         }
 
     }
