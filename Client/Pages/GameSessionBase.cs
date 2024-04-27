@@ -40,6 +40,7 @@ namespace JokersJunction.Client.Pages
                 .WithUrl(NavigationManager.ToAbsoluteUri("/gameHub"))
                 .Build();
 
+
             _hubConnection.On("ReceiveMessage", (object message) =>
             {
                 var newMessage = JsonConvert.DeserializeObject<GetMessageResult>(message.ToString());
@@ -186,6 +187,15 @@ namespace JokersJunction.Client.Pages
                 MessageInput = string.Empty;
             }
 
+        }
+        protected async Task SendSignal(string user, string signal)
+        {
+            await _hubConnection.SendAsync("SendSignal", user, signal);
+        }
+
+        protected async Task StartConnection(string user)
+        {
+            await _hubConnection.SendAsync("StartConnection", user);
         }
     }
 }

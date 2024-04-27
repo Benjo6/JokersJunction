@@ -1,21 +1,16 @@
-using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
 using System.Text;
+using JokersJunction.Authentication.Protos;
+using JokersJunction.Bank.Protos;
 using JokersJunction.Server.Data;
 using JokersJunction.Server.Hubs;
 using JokersJunction.Server.Repositories;
 using JokersJunction.Server.Repositories.Contracts;
-using JokersJunction.Shared;
+using JokersJunction.Shared.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -32,6 +27,7 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 })
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<AppDbContext>();
+
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -50,10 +46,23 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddSignalR();
 
+
 builder.Services.AddScoped<ITableRepository, TableRepository>();
 builder.Services.AddScoped<IPlayerNotesRepository, PlayerNoteRepository>();
 builder.Services.AddScoped<IGameSessionRepository, GameSessionRepository>();
 builder.Services.AddControllersWithViews();
+builder.Services.AddGrpcClient<Authorizer.AuthorizerClient>(options =>
+{
+    options.Address = new Uri("https://localhost:7017");
+});
+builder.Services.AddGrpcClient<Currency.CurrencyClient>(options =>
+{
+    options.Address = new Uri("https://localhost:7158");
+});
+
+// Add Ocelot services
+//builder.Configuration.AddJsonFile("ocelot.json");
+//builder.Services.AddOcelot(builder.Configuration);
 
 var app = builder.Build();
 
@@ -83,7 +92,7 @@ app.Use(async (context, next) =>
     if (token != null)
     {
         var tokenHandler = new JwtSecurityTokenHandler();
-        var key = Encoding.ASCII.GetBytes(builder.Configuration["JwtSecurityKey"]);
+        var key = Encoding.ASCII.GetBytes(builder.Configuration["JwtSecurityKey"]!);
         var principal = tokenHandler.ValidateToken(token, new TokenValidationParameters
         {
             ValidateIssuerSigningKey = true,
@@ -101,6 +110,9 @@ app.Use(async (context, next) =>
     await next();
 });
 
+// Use Ocelot
+
+//await app.UseOcelot();
 
 app.UseAuthentication();
 app.UseAuthorization();

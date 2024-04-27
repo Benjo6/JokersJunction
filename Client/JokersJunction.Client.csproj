@@ -19,4 +19,16 @@
     <ProjectReference Include="..\Shared\JokersJunction.Shared.csproj" />
   </ItemGroup>
 
+	<ItemGroup>
+		<Protobuf Include="..\AuthenticationService\Protos\authentication.proto">
+			<GrpcServices>Client</GrpcServices>
+			<Access>Public</Access>
+			<ProtoCompile>True</ProtoCompile>
+			<CompileOutputs>True</CompileOutputs>
+			<OutputDir>obj\Debug\net7.0\</OutputDir>
+			<Generator>MSBuild:Compile</Generator>
+			<Link>Protos\authentication.proto</Link>
+		</Protobuf>
+	</ItemGroup>
+
 </Project>

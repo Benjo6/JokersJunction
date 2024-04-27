@@ -1,0 +1,30 @@
+//{
+//  "Routes": [
+//    {
+//      "DownstreamPathTemplate": "/Authentication.Authorizer/Register",
+//      "DownstreamScheme": "http",
+//      "DownstreamHostAndPorts": [
+//        {
+//          "Host": "localhost",
+//          "Port": 7017
+//        }
+//      ],
+//      "UpstreamPathTemplate": "/api/auth/register",
+//      "UpstreamHttpMethod": [ "Post" ],
+//      "DownstreamRouteType": "Grpc"
+//    },
+//    {
+//      "DownstreamPathTemplate": "/Authentication.Authorizer/Login",
+//      "DownstreamScheme": "http",
+//      "DownstreamHostAndPorts": [
+//        {
+//          "Host": "localhost",
+//          "Port": 7017
+//        }
+//      ],
+//      "UpstreamPathTemplate": "/api/auth/login",
+//      "UpstreamHttpMethod": [ "Post" ],
+//      "DownstreamRouteType": "Grpc"
+//    }
+//  ]
+//}

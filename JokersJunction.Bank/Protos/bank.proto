@@ -1,0 +1,50 @@
+syntax = "proto3";
+
+package JokersJunction.Bank.Protos;
+
+// Define the service for currency operations
+service Currency {
+  // Add currency to the user's account
+  rpc Add(AddRequest) returns (AddResponse);
+  
+  // Remove currency from the user's account
+  rpc Remove(RemoveRequest) returns (RemoveResponse);
+  
+  // Get the balance of the user's account
+  rpc Balance(BalanceRequest) returns (BalanceResponse);
+}
+
+// Request message for adding currency
+message AddRequest {
+  string user_name = 1;
+  int32 amount = 2;
+}
+
+// Response message for adding currency
+message AddResponse {
+  bool success = 1;
+  string error_message = 2;
+}
+
+// Request message for removing currency
+message RemoveRequest {
+  string user_name = 1;
+  int32 amount = 2;
+}
+
+// Response message for removing currency
+message RemoveResponse {
+  bool success = 1;
+  string error_message = 2;
+}
+
+// Request message for checking balance
+message BalanceRequest {
+  string user_name = 1;
+}
+
+// Response message for balance inquiry
+message BalanceResponse {
+  int32 balance = 1;
+  string error_message = 2;
+}

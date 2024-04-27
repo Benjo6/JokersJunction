@@ -2,13 +2,15 @@
 using Blazored.Modal.Services;
 using JokersJunction.Client.Services;
 using JokersJunction.Shared.Models;
+using JokersJunction.Shared.Requests;
 using Microsoft.AspNetCore.Components;
 
 namespace JokersJunction.Client.Components
 {
     public class LogInBase : ComponentBase
     {
-        public LoginModel User { get; set; } = new();
+        public LoginRequest User { get; set; } = new();
+
         [Inject]
         public IAuthService AccountService { get; set; }
 

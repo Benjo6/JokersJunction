@@ -1,4 +1,6 @@
-﻿namespace JokersJunction.Shared
+﻿using JokersJunction.Shared.Models;
+
+namespace JokersJunction.Shared
 {
     public class PlayerNote
     {

@@ -1,59 +1,81 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-using JokersJunction.Shared;
-using System.Security.Claims;
+﻿using Microsoft.AspNetCore.Mvc;
+using JokersJunction.Bank.Protos;
+using JokersJunction.Server.Controllers.Base;
 using Microsoft.AspNetCore.Authorization;
+using Grpc.Core;
 
-namespace JokersJunction.Server.Controllers
+namespace JokersJunction.Server.Controllers;
+
+[Route("currency")]
+[ApiController]
+public class CurrencyController : GrpcControllerBase<Currency.CurrencyClient>
 {
-    [Route("api/currency")]
-    [ApiController]
-    public class CurrencyController : ControllerBase
+    private readonly ILogger<CurrencyController> _logger;
+
+    public CurrencyController(ILogger<CurrencyController> logger)
     {
-        private readonly UserManager<ApplicationUser> _userManager;
+        _logger = logger;
+    }
 
-        public CurrencyController(UserManager<ApplicationUser> userManager)
+    [Authorize(Roles = "Admin")]
+    [HttpPost("add")]
+    public async Task<IActionResult> Add(int amount, string userName)
+    {
+        try
         {
-            _userManager = userManager;
-        }
-
-        [Authorize(Roles = "Admin")]
-        [HttpPost]
-        public async Task Add(int amount, string userName)
-        {
-            var user = await _userManager.FindByNameAsync(userName);
-            user.Currency += amount;
-            await _userManager.UpdateAsync(user);
-        }
-
-        [Authorize(Roles = "Admin")]
-        [HttpPost]
-        public async Task Remove(int amount, string userName)
-        {
-            var user = await _userManager.FindByNameAsync(userName);
-            if (user.Currency >= amount)
+            var response = await Service.AddAsync(new AddRequest { UserName = userName, Amount = amount });
+            if (response.Success)
             {
-                user.Currency -= amount;
-                await _userManager.UpdateAsync(user);
+                return Ok(); // Successful response
             }
-            //error
-
-        }
-
-        [Authorize(Roles = "User,Admin")]
-        [HttpGet]
-        public async Task<int> Balance()
-        {
-            var usernameClaim = HttpContext.User.FindFirst(ClaimTypes.Name);
-            if (usernameClaim == null)
+            else
             {
+                return BadRequest(response.ErrorMessage); // Handle error
             }
-
-            var username = usernameClaim.Value;
-            var user = await _userManager.FindByNameAsync(username);
-            return user.Currency;
         }
+        catch (RpcException ex)
+        {
+            _logger.LogError(ex, "Error adding currency");
+            return StatusCode((int)ex.StatusCode, ex.Status.Detail);
+        }
+    }
 
+    [Authorize(Roles = "Admin")]
+    [HttpPost("remove")]
+    public async Task<IActionResult> Remove(int amount, string userName)
+    {
+        try
+        {
+            var response = await Service.RemoveAsync(new RemoveRequest { UserName = userName, Amount = amount });
+            if (response.Success)
+            {
+                return Ok(); // Successful response
+            }
+            else
+            {
+                return BadRequest(response.ErrorMessage); // Handle error
+            }
+        }
+        catch (RpcException ex)
+        {
+            _logger.LogError(ex, "Error removing currency");
+            return StatusCode((int)ex.StatusCode, ex.Status.Detail);
+        }
+    }
 
+    [Authorize(Roles = "User,Admin")]
+    [HttpGet("balance")]
+    public async Task<IActionResult> Balance(string userName)
+    {
+        try
+        {
+            var response = await Service.BalanceAsync(new BalanceRequest { UserName = userName });
+            return Ok(response.Balance); // Successful response
+        }
+        catch (RpcException ex)
+        {
+            _logger.LogError(ex, "Error getting balance");
+            return StatusCode((int)ex.StatusCode, ex.Status.Detail);
+        }
     }
 }

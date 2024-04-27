@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using JokersJunction.Client;
 using JokersJunction.Client.Services;
 using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.AspNetCore.Components.Web;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
@@ -21,5 +20,6 @@ builder.Services.AddScoped<ITableService, TableService>();
 builder.Services.AddScoped<IGameSessionService, GameSessionService>();
 builder.Services.AddScoped<IStateService, StateService>();
 builder.Services.AddScoped<IPlayerNoteService, PlayerNoteService>();
+
 
 await builder.Build().RunAsync();

@@ -1,6 +1,7 @@
 ﻿using JokersJunction.Server.Data;
 using JokersJunction.Server.Repositories.Contracts;
 using JokersJunction.Shared;
+using JokersJunction.Shared.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
