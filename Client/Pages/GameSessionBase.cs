@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.SignalR.Client;
 using Newtonsoft.Json;
+using Microsoft.AspNetCore.Components.Web;
 
 namespace JokersJunction.Client.Pages
 {
@@ -188,14 +189,12 @@ namespace JokersJunction.Client.Pages
             }
 
         }
-        protected async Task SendSignal(string user, string signal)
+        protected async Task SendOnEnter(KeyboardEventArgs e)
         {
-            await _hubConnection.SendAsync("SendSignal", user, signal);
-        }
-
-        protected async Task StartConnection(string user)
-        {
-            await _hubConnection.SendAsync("StartConnection", user);
+            if (e.Key == "Enter")
+            {
+                await SendMessage();
+            }
         }
     }
 }

@@ -14,9 +14,6 @@ namespace JokersJunction.Client.Components
         [Inject]
         public IAuthService AccountService { get; set; }
 
-        [Inject]
-        public NavigationManager NavigationManager { get; set; }
-
         [CascadingParameter]
         public BlazoredModalInstance BlazoredModal { get; set; }
 
