@@ -1,7 +1,6 @@
 ﻿using JokersJunction.Shared.Models;
 using Microsoft.AspNetCore.Components;
 using System.Net.Http.Json;
-using JokersJunction.Shared;
 
 namespace JokersJunction.Client.Services
 {
@@ -14,7 +13,7 @@ namespace JokersJunction.Client.Services
             _httpClient = httpClient;
         }
 
-        public async Task<CreateNoteResult> Create(CreatePlayerNote model)
+        public async Task<CreateNoteResult> Create(CreateNoteModel model)
         {
             var response = await _httpClient.PostAsJsonAsync("api/PlayerNote", model);
 
@@ -30,18 +29,15 @@ namespace JokersJunction.Client.Services
             }
         }
 
-        public async Task<GetNotesResult> GetList(string? userId)
+        public async Task<GetNotesResult> GetList()
         {
-            var result = await _httpClient.GetFromJsonAsync<GetNotesResult>($"api/PlayerNote?userId={userId}");
+            var result = await _httpClient.GetFromJsonAsync<GetNotesResult>("api/PlayerNote");
             return result;
         }
 
-
-        public async Task<DeleteTableResult> Delete(string userId, string notedPlayerName)
+        public async Task<DeleteTableResult> Delete(string notedPlayerName)
         {
-            var requestPayload = new { userId, notedPlayerName }; // Create an anonymous object with both parameters
-
-            var response = await _httpClient.PostAsJsonAsync("api/PlayerNote/delete", requestPayload);
+            var response = await _httpClient.PostAsJsonAsync("api/PlayerNote/delete", notedPlayerName);
 
             if (response.IsSuccessStatusCode)
             {
@@ -54,6 +50,5 @@ namespace JokersJunction.Client.Services
                 return null;
             }
         }
-
     }
 }

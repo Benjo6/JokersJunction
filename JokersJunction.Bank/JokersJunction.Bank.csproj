@@ -15,7 +15,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\JokersJunction.Authentication\JokersJunction.Authentication.csproj" />
     <ProjectReference Include="..\Shared\JokersJunction.Shared.csproj" />
   </ItemGroup>
 

@@ -8,6 +8,7 @@
 
   <ItemGroup>
 	  <PackageReference Include="AutoMapper" Version="13.0.1" />
+	  <PackageReference Include="GrpcJsonTranscoder" Version="0.5.0" />
 	  <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.18" />
 	  <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="7.0.18" />
 	  <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="7.0.18" />
@@ -21,11 +22,12 @@
 	    <PrivateAssets>all</PrivateAssets>
 	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 	  </PackageReference>
-	  <PackageReference Include="Ocelot" Version="23.2.2" />
+	  <PackageReference Include="Ocelot" Version="14.0.11" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Client\JokersJunction.Client.csproj" />
+    <ProjectReference Include="..\JokersJunction.Authentication\JokersJunction.Authentication.csproj" />
     <ProjectReference Include="..\JokersJunction.Bank\JokersJunction.Bank.csproj" />
     <ProjectReference Include="..\Shared\JokersJunction.Shared.csproj" />
   </ItemGroup>

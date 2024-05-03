@@ -5,7 +5,6 @@ using JokersJunction.Client.Services;
 using JokersJunction.Shared;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
-using System.Security.Claims;
 
 namespace JokersJunction.Client.Shared
 {
@@ -43,7 +42,7 @@ namespace JokersJunction.Client.Shared
             var result = await formModal.Result;
             if (result.Cancelled) return;
 
-            GameInformation.PlayersNotes = (await PlayerNoteService.GetList(AuthState.User.FindFirstValue(ClaimTypes.NameIdentifier))).PlayerNotes;
+            GameInformation.PlayersNotes = (await PlayerNoteService.GetList()).PlayerNotes;
             StateHasChanged();
         }
     }

@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace JokersJunction.Shared.Requests
+namespace JokersJunction.Shared.Models
 {
-    public class CreateTableRequest
+    public class CreateTableModel
     {
         [Required]
         public string Name { get; set; }

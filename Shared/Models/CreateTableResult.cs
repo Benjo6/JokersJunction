@@ -1,6 +1,6 @@
-﻿namespace JokersJunction.Shared.Responses
+﻿namespace JokersJunction.Shared.Models
 {
-    public class CreateTableResponse
+    public class CreateTableResult
     {
         public bool Successful { get; set; }
         public IEnumerable<string> Errors { get; set; }

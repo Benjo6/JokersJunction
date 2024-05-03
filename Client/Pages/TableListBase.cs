@@ -1,6 +1,5 @@
 ﻿using JokersJunction.Client.Services;
 using JokersJunction.Shared;
-using JokersJunction.Shared.Models;
 using Microsoft.AspNetCore.Components;
 
 namespace JokersJunction.Client.Pages

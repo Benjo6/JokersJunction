@@ -1,14 +1,13 @@
-﻿using JokersJunction.Shared;
-using JokersJunction.Shared.Models;
+﻿using JokersJunction.Shared.Models;
 
 namespace JokersJunction.Client.Services
 {
     public interface IPlayerNoteService
     {
-        Task<CreateNoteResult> Create(CreatePlayerNote model);
+        Task<CreateNoteResult> Create(CreateNoteModel model);
 
-        Task<GetNotesResult> GetList(string? userId);
+        Task<GetNotesResult> GetList();
 
-        Task<DeleteTableResult> Delete(string userId, string notedPlayerName);
+        Task<DeleteTableResult> Delete(string notedPlayerName);
     }
 }
