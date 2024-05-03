@@ -1,12 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using JokersJunction.Bank.Protos;
-using JokersJunction.Server.Controllers.Base;
 using Microsoft.AspNetCore.Authorization;
 using Grpc.Core;
+using JokersJunction.Grpc.Base;
 
-namespace JokersJunction.Server.Controllers;
+namespace JokersJunction.Bank.Controllers;
 
-[Route("currency")]
+[Route("api/currency")]
 [ApiController]
 public class CurrencyController : GrpcControllerBase<Currency.CurrencyClient>
 {

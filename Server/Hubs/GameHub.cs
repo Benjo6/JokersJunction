@@ -1,9 +1,9 @@
 ﻿using System.Collections;
 using JokersJunction.Server.Evaluators;
 using JokersJunction.Server.Models;
-using JokersJunction.Server.Repositories.Contracts;
 using JokersJunction.Shared;
 using JokersJunction.Shared.Models;
+using JokersJunction.Table.Repositories.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.SignalR;
 

@@ -27,7 +27,7 @@ namespace JokersJunction.Client.Services
 
         public async Task<RegisterResponse> Register(RegisterRequest registerModel)
         {
-            var response = await _httpClient.PostAsJsonAsync("auth/register", registerModel);
+            var response = await _httpClient.PostAsJsonAsync("api/auth/register", registerModel);
 
             if (response.IsSuccessStatusCode)
             {
@@ -66,22 +66,19 @@ namespace JokersJunction.Client.Services
             }
         }
 
-
-
         public async Task<LoginResponse> Login(LoginRequest request)
         {
-            var loginAsJson = JsonSerializer.Serialize(request);
-            var response = await _httpClient.PostAsync("auth/login", new StringContent(loginAsJson, Encoding.UTF8, "application/json"));
-            var responseContent = await response.Content.ReadAsStringAsync();
+            try
+            {
+                var response = await _httpClient.PostAsJsonAsync("api/auth/login", request);
+                var responseContent = await response.Content.ReadAsStringAsync();
 
-            if (!response.IsSuccessStatusCode)
-            {
-                Console.WriteLine($"Error: {responseContent}");
-                return null;
-            }
-            else
-            {
-                try
+                if (!response.IsSuccessStatusCode)
+                {
+                    Console.WriteLine($"Error: {responseContent}");
+                    return null;
+                }
+                else
                 {
                     var result = JsonSerializer.Deserialize<LoginResponse>(responseContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
                     await _localStorage.SetItemAsync("authToken", result.Token);
@@ -90,13 +87,14 @@ namespace JokersJunction.Client.Services
                     _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", result.Token);
                     return result;
                 }
-                catch (System.Text.Json.JsonException ex)
-                {
-                    Console.WriteLine($"Invalid JSON format: {responseContent}");
-                    throw;
-                }
+            }
+            catch (JsonException ex)
+            {
+                Console.WriteLine($"Invalid JSON format: {ex.Message}");
+                throw;
             }
         }
+
 
         public async Task Logout()
         {

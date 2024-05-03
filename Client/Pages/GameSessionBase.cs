@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.SignalR.Client;
 using Newtonsoft.Json;
 using Microsoft.AspNetCore.Components.Web;
+using System.Security.Claims;
 
 namespace JokersJunction.Client.Pages
 {
@@ -117,7 +118,7 @@ namespace JokersJunction.Client.Pages
 
             await _hubConnection.SendAsync("AddToUsers", await LocalStorageService.GetItemAsync<int>("currentTable"));
 
-            GameInformation.PlayersNotes = (await PlayerNoteService.GetList()).PlayerNotes;
+            GameInformation.PlayersNotes = (await PlayerNoteService.GetList(AuthState.User.FindFirstValue(ClaimTypes.NameIdentifier))).PlayerNotes;
 
             await base.OnInitializedAsync();
 

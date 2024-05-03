@@ -4,13 +4,13 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;
-using JokersJunction.Authentication.Protos;
-using JokersJunction.Bank.Protos;
 using JokersJunction.Server.Data;
 using JokersJunction.Server.Hubs;
-using JokersJunction.Server.Repositories;
-using JokersJunction.Server.Repositories.Contracts;
 using JokersJunction.Shared.Models;
+using Ocelot.DependencyInjection;
+using JokersJunction.Authentication.Protos;
+using JokersJunction.Bank.Protos;
+using Ocelot.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -45,24 +45,21 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 
 builder.Services.AddSignalR();
-
-
-builder.Services.AddScoped<ITableRepository, TableRepository>();
-builder.Services.AddScoped<IPlayerNotesRepository, PlayerNoteRepository>();
-builder.Services.AddScoped<IGameSessionRepository, GameSessionRepository>();
-builder.Services.AddControllersWithViews();
 builder.Services.AddGrpcClient<Authorizer.AuthorizerClient>(options =>
 {
-    options.Address = new Uri("https://localhost:7017");
+    options.Address = new Uri("https://localhost:5001");
 });
 builder.Services.AddGrpcClient<Currency.CurrencyClient>(options =>
 {
-    options.Address = new Uri("https://localhost:7158");
+    options.Address = new Uri("https://localhost:5002");
 });
 
+builder.Configuration.AddJsonFile("ocelot.json", optional: false, reloadOnChange: true);
+
+builder.Services.AddControllersWithViews();
+
 // Add Ocelot services
-//builder.Configuration.AddJsonFile("ocelot.json");
-//builder.Services.AddOcelot(builder.Configuration);
+builder.Services.AddOcelot(builder.Configuration);
 
 var app = builder.Build();
 
@@ -78,12 +75,11 @@ else
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
+app.UseRouting();
 
-app.UseHttpsRedirection();
 app.UseBlazorFrameworkFiles();
 app.UseStaticFiles();
 
-app.UseRouting();
 
 // Add this middleware to validate the token and set HttpContext.User
 app.Use(async (context, next) =>
@@ -111,17 +107,16 @@ app.Use(async (context, next) =>
 });
 
 // Use Ocelot
-
 //await app.UseOcelot();
-
+app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
+
 
 app.UseEndpoints(endpoints =>
 {
     endpoints.MapControllers();
     endpoints.MapHub<GameHub>("/gameHub");
-    endpoints.MapFallbackToFile("index.html");
 });
 
 app.Run();

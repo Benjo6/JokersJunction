@@ -5,6 +5,6 @@
         public bool Successful { get; set; }
 
         public string Error { get; set; }
-        public List<PlayerNote> PlayerNotes { get; set; }
+        public List<PlayerNote?> PlayerNotes { get; set; }
     }
 }

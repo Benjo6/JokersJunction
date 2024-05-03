@@ -1,3 +1,4 @@
+using JokersJunction.Bank.Protos;
 using JokersJunction.Bank.Services;
 using JokersJunction.Server.Data;
 using JokersJunction.Shared.Models;
@@ -11,6 +12,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddGrpc();
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DBConnection")));
@@ -23,11 +26,19 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
     })
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<AppDbContext>();
+builder.Services.AddGrpcClient<Currency.CurrencyClient>(options =>
+{
+    options.Address = new Uri("https://localhost:5002");
+});
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
+app.UseHttpsRedirection();
+app.UseAuthentication();
+app.UseAuthorization();
+app.MapControllers();
 app.MapGrpcService<CurrencyService>();
-app.MapGet("/", () => "Communication with gRPC endpoints must be made through a gRPC client. To learn how to create a client, visit: https://go.microsoft.com/fwlink/?linkid=2086909");
+
 
 app.Run();

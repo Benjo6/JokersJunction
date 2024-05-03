@@ -1,60 +1,113 @@
 ﻿using JokersJunction.Shared;
 using JokersJunction.Shared.Models;
+using JokersJunction.Shared.Requests;
+using JokersJunction.Shared.Responses;
 using System.Net.Http.Json;
+using System.Text.Json;
 
-namespace JokersJunction.Client.Services
+namespace JokersJunction.Client.Services;
+
+public class TableService : ITableService
 {
-    public class TableService : ITableService
+    private readonly HttpClient _httpClient;
+
+    public TableService(HttpClient httpClient)
     {
-        private readonly HttpClient _httpClient;
+        _httpClient = httpClient;
+        ;
+    }
 
-        public TableService(HttpClient httpClient)
+    public async Task<CreateTableResponse?> Create(CreateTableRequest request)
+    {
+        try
         {
-            _httpClient = httpClient;
-        }
-        public async Task<CreateTableResult> Create(CreateTableModel model)
-        {
-            var response = await _httpClient.PostAsJsonAsync("api/table", model);
+            var response = await _httpClient.PostAsJsonAsync("api/Table", request);
 
             if (response.IsSuccessStatusCode)
             {
-                var result = await response.Content.ReadFromJsonAsync<CreateTableResult>();
-                return result;
+                return await response.Content.ReadFromJsonAsync<CreateTableResponse>();
             }
             else
             {
-                // Handle error response here
-                return null;
+                // Handle error response here (e.g., log, throw custom exception, etc.)
+                return new CreateTableResponse
+                {
+                    Successful = false,
+                    Errors = new[] { "Error creating table" }
+                };
             }
         }
-
-        public async Task<GetTablesResult> GetList()
+        catch (Exception ex)
         {
-            var result = await _httpClient.GetFromJsonAsync<GetTablesResult>("api/table");
+            // Log the exception or handle it as needed
+            return new CreateTableResponse
+            {
+                Successful = false,
+                Errors = new[] { "Unexpected error occurred. Try again or contact support" }
+            };
+        }
+    }
+
+    public async Task<GetTablesResult?> GetList()
+    {
+        try
+        {
+            var response = await _httpClient.GetAsync("api/Table");
+            var content = await response.Content.ReadAsStringAsync();
+            var result = JsonSerializer.Deserialize<GetTablesResult>(content);
             return result;
         }
-
-        public async Task<PokerTable> GetById(int id)
+        catch (Exception ex)
         {
-            var result = await _httpClient.GetFromJsonAsync<PokerTable>($"api/table/{id}");
-            return result;
+            // Log the exception or handle it as needed
+            throw;
+            return new GetTablesResult
+            {
+                Successful = false,
+                Error = $"Error fetching tables: {ex}"
+            };
         }
+    }
 
-        public async Task<DeleteTableResult> Delete(int id)
+
+    public async Task<PokerTable?> GetById(int id)
+    {
+        try
         {
-            var response = await _httpClient.PostAsJsonAsync($"api/table/delete", id);
+            return await _httpClient.GetFromJsonAsync<PokerTable>($"api/Table/{id}");
+        }
+        catch (Exception ex)
+        {
+            // Log the exception or handle it as needed
+            return null; // Return appropriate response for not found
+        }
+    }
+
+    public async Task<DeleteTableResult?> Delete(int id)
+    {
+        try
+        {
+            var response = await _httpClient.DeleteAsync($"api/Table/{id}");
 
             if (response.IsSuccessStatusCode)
             {
-                var result = await response.Content.ReadFromJsonAsync<DeleteTableResult>();
-                return result;
+                return await response.Content.ReadFromJsonAsync<DeleteTableResult>();
             }
-            else
+            // Handle error response here
+            return new DeleteTableResult
             {
-                // Handle error response here
-                return null;
-            }
+                Successful = false,
+                Error = "Error deleting table"
+            };
         }
-
+        catch (Exception ex)
+        {
+            // Log the exception or handle it as needed
+            return new DeleteTableResult
+            {
+                Successful = false,
+                Error = "Unexpected error occurred. Try again or contact support"
+            };
+        }
     }
 }

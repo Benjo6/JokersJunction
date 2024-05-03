@@ -1,6 +1,6 @@
 ﻿using Blazored.Modal;
 using JokersJunction.Client.Services;
-using JokersJunction.Shared.Models;
+using JokersJunction.Shared.Requests;
 using Microsoft.AspNetCore.Components;
 
 namespace JokersJunction.Client.Components
@@ -12,7 +12,7 @@ namespace JokersJunction.Client.Components
         [CascadingParameter]
         public BlazoredModalInstance BlazoredModal { get; set; }
 
-        public CreateTableModel PokerTable { get; set; } = new CreateTableModel();
+        public CreateTableRequest PokerTable { get; set; } = new CreateTableRequest();
         public bool ShowErrors { get; set; }
         public IEnumerable<string> Errors { get; set; }
 
