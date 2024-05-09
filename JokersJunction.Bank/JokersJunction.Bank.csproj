@@ -12,9 +12,12 @@
 
   <ItemGroup>
     <PackageReference Include="Grpc.AspNetCore" Version="2.49.0" />
+    <PackageReference Include="MassTransit.Abstractions" Version="8.2.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.18" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\JokersJunction.Common\JokersJunction.Common.csproj" />
     <ProjectReference Include="..\Shared\JokersJunction.Shared.csproj" />
   </ItemGroup>
 

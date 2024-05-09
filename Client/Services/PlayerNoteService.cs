@@ -1,4 +1,5 @@
-﻿using JokersJunction.Shared.Models;
+﻿using JokersJunction.Shared;
+using JokersJunction.Shared.Models;
 using Microsoft.AspNetCore.Components;
 using System.Net.Http.Json;
 
@@ -10,12 +11,13 @@ namespace JokersJunction.Client.Services
 
         public PlayerNoteService(HttpClient httpClient)
         {
+            httpClient.BaseAddress = new Uri("https://localhost:2000/");
             _httpClient = httpClient;
         }
 
         public async Task<CreateNoteResult> Create(CreateNoteModel model)
         {
-            var response = await _httpClient.PostAsJsonAsync("api/PlayerNote", model);
+            var response = await _httpClient.PostAsJsonAsync("gateway/player-note", model);
 
             if (response.IsSuccessStatusCode)
             {
@@ -29,15 +31,15 @@ namespace JokersJunction.Client.Services
             }
         }
 
-        public async Task<GetNotesResult> GetList()
+        public async Task<GetNotesResult> GetList(string userId)
         {
-            var result = await _httpClient.GetFromJsonAsync<GetNotesResult>("api/PlayerNote");
+            var result = await _httpClient.GetFromJsonAsync<GetNotesResult>($"gateway/player-note/{userId}");
             return result;
         }
 
-        public async Task<DeleteTableResult> Delete(string notedPlayerName)
+        public async Task<DeleteTableResult> Delete(string userId, string notedPlayerName)
         {
-            var response = await _httpClient.PostAsJsonAsync("api/PlayerNote/delete", notedPlayerName);
+            var response = await _httpClient.DeleteAsync($"gateway/player-note/{userId}/{notedPlayerName}");
 
             if (response.IsSuccessStatusCode)
             {
@@ -49,6 +51,12 @@ namespace JokersJunction.Client.Services
                 // Handle error response here
                 return null;
             }
+        }
+
+        public async Task<PlayerNote> GetNoteByName(string userId, string notePlayerName)
+        {
+            var result = await _httpClient.GetFromJsonAsync<PlayerNote>($"gateway/player-note/by-name/{userId}/{notePlayerName}");
+            return result;
         }
     }
 }

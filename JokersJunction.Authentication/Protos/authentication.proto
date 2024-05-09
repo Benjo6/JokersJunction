@@ -5,6 +5,7 @@ option csharp_namespace = "JokersJunction.Authentication.Protos";
 service Authorizer{
 	rpc Register(RegisterRequest) returns (RegisterResponse);
 	rpc Login(LoginRequest) returns (LoginResponse);
+	rpc Disconnect(DisconnectRequest) returns (DisconnectResponse);
 }
 
 message RegisterRequest{
@@ -29,4 +30,13 @@ message LoginResponse {
     bool successful = 1;
     string error = 2;
     string token = 3;
+}
+
+message DisconnectRequest{
+	string username = 1;
+}
+
+message DisconnectResponse{
+	bool successful = 1;
+	string error = 2;
 }

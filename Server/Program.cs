@@ -1,16 +1,17 @@
+using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;
-using JokersJunction.Authentication.Protos;
-using JokersJunction.Bank.Protos;
 using JokersJunction.Server.Data;
 using JokersJunction.Server.Hubs;
-using JokersJunction.Server.Repositories;
-using JokersJunction.Server.Repositories.Contracts;
+
 using JokersJunction.Shared.Models;
+using JokersJunction.Common.Databases.Interfaces;
+using JokersJunction.Common.Databases;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,6 +19,7 @@ builder.Services.AddAutoMapper(typeof(Program));
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DBConnection")));
+builder.Services.AddTransient<IDatabaseService>(sp => new DatabaseService(builder.Configuration.GetConnectionString("MongoConnection")));
 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 {
@@ -27,7 +29,6 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 })
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<AppDbContext>();
-
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -45,24 +46,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 
 builder.Services.AddSignalR();
-
-
-builder.Services.AddScoped<ITableRepository, TableRepository>();
-builder.Services.AddScoped<IPlayerNotesRepository, PlayerNoteRepository>();
-builder.Services.AddScoped<IGameSessionRepository, GameSessionRepository>();
 builder.Services.AddControllersWithViews();
-builder.Services.AddGrpcClient<Authorizer.AuthorizerClient>(options =>
-{
-    options.Address = new Uri("https://localhost:7017");
-});
-builder.Services.AddGrpcClient<Currency.CurrencyClient>(options =>
-{
-    options.Address = new Uri("https://localhost:7158");
-});
-
-// Add Ocelot services
-//builder.Configuration.AddJsonFile("ocelot.json");
-//builder.Services.AddOcelot(builder.Configuration);
 
 var app = builder.Build();
 
@@ -85,42 +69,13 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-// Add this middleware to validate the token and set HttpContext.User
-app.Use(async (context, next) =>
-{
-    var token = context.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
-    if (token != null)
-    {
-        var tokenHandler = new JwtSecurityTokenHandler();
-        var key = Encoding.ASCII.GetBytes(builder.Configuration["JwtSecurityKey"]!);
-        var principal = tokenHandler.ValidateToken(token, new TokenValidationParameters
-        {
-            ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(key),
-            ValidateIssuer = true,  // Set to true
-            ValidateAudience = true,  // Set to true
-            ValidIssuer = builder.Configuration["JwtIssuer"],  // Set to the correct value
-            ValidAudience = builder.Configuration["JwtAudience"],  // Set to the correct value
-            ClockSkew = TimeSpan.Zero
-        }, out var validatedToken);
-
-        context.User = principal;
-    }
-
-    await next();
-});
-
-// Use Ocelot
-
-//await app.UseOcelot();
-
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.UseEndpoints(endpoints =>
 {
     endpoints.MapControllers();
-    endpoints.MapHub<GameHub>("/gameHub");
+    endpoints.MapHub<GameHub>("/GameHub");
     endpoints.MapFallbackToFile("index.html");
 });
 

@@ -1,10 +1,9 @@
-﻿using JokersJunction.Shared;
-using JokersJunction.Shared.Models;
+﻿using JokersJunction.Shared.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
-namespace JokersJunction.Server.Data
+namespace JokersJunction.Shared.Data
 {
     public class AppDbContext : IdentityDbContext<ApplicationUser>
     {
@@ -13,7 +12,6 @@ namespace JokersJunction.Server.Data
 
         }
 
-        public DbSet<PokerTable> PokerTables { get; set; }
         public DbSet<PlayerNote> PlayerNotes { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)

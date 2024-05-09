@@ -2,6 +2,7 @@
 using Blazored.Modal.Services;
 using JokersJunction.Client.Shared;
 using Microsoft.AspNetCore.Components;
+using MongoDB.Bson;
 
 namespace JokersJunction.Client.Pages
 {
@@ -12,12 +13,12 @@ namespace JokersJunction.Client.Pages
         [Parameter] public EventCallback<string> OnChange { get; set; }
 
 
-        public int CurrentTable { get; set; }
+        public string CurrentTable { get; set; }
 
         protected override async Task OnInitializedAsync()
         {
             await base.OnInitializedAsync();
-            CurrentTable = await LocalStorageService.GetItemAsync<int>("currentTable");
+            CurrentTable = await LocalStorageService.GetItemAsync<string>("currentTable");
         }
 
         protected async Task LogOut()

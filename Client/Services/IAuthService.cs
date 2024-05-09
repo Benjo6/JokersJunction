@@ -1,5 +1,4 @@
-﻿using JokersJunction.Shared.Models;
-using JokersJunction.Shared.Requests;
+﻿using JokersJunction.Shared.Requests;
 using JokersJunction.Shared.Responses;
 
 namespace JokersJunction.Client.Services

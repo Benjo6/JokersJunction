@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using JokersJunction.Server.Data;
+using JokersJunction.Shared.Data;
 
 namespace JokersJunction.Server.Data.Migrations
 {

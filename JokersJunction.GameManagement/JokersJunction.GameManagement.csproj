@@ -6,4 +6,13 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="MassTransit.Abstractions" Version="8.2.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\JokersJunction.Common\JokersJunction.Common.csproj" />
+    <ProjectReference Include="..\Shared\JokersJunction.Shared.csproj" />
+  </ItemGroup>
+
 </Project>

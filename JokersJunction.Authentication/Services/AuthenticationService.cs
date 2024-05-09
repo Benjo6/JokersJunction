@@ -3,8 +3,11 @@ using System.Security.Claims;
 using System.Text;
 using Grpc.Core;
 using JokersJunction.Authentication.Protos;
+using JokersJunction.Shared.Events;
 using JokersJunction.Shared.Models;
+using MassTransit;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.IdentityModel.Tokens;
 using LoginRequest = JokersJunction.Authentication.Protos.LoginRequest;
 using RegisterRequest = JokersJunction.Authentication.Protos.RegisterRequest;
@@ -16,12 +19,13 @@ public class AuthenticationService : Authorizer.AuthorizerBase
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly IConfiguration _configuration;
     private readonly SignInManager<ApplicationUser> _signInManager;
-
-    public AuthenticationService(UserManager<ApplicationUser> userManager, IConfiguration configuration, SignInManager<ApplicationUser> signInManager)
+    private readonly IPublishEndpoint _publishEndpoint;
+    public AuthenticationService(UserManager<ApplicationUser> userManager, IConfiguration configuration, SignInManager<ApplicationUser> signInManager, IPublishEndpoint publishEndpoint)
     {
         _userManager = userManager;
         _configuration = configuration;
         _signInManager = signInManager;
+        _publishEndpoint = publishEndpoint;
     }
 
     public override async Task<RegisterResponse> Register(RegisterRequest request, ServerCallContext context)
@@ -65,6 +69,20 @@ public class AuthenticationService : Authorizer.AuthorizerBase
 
         return new LoginResponse { Successful = true, Token = new JwtSecurityTokenHandler().WriteToken(token) };
     }
+
+    //public override async Task<DisconnectResponse> Disconnect(DisconnectRequest request, ServerCallContext context)
+    //{
+    //    var user = await _userManager.FindByNameAsync(request.Username);
+
+    //    if (user is null)
+    //    {
+    //        return new DisconnectResponse { Successful = false, Error = "User not found." };
+    //    }
+
+    //    await _publishEndpoint.Publish(new UserDisconnectedEvent { Username = request.Username });
+
+    //    return new DisconnectResponse { Successful = true };
+    //}
 
     private JwtSecurityToken GenerateJwtToken(IEnumerable<Claim> claims)
     {

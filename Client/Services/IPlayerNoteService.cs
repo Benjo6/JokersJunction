@@ -1,4 +1,5 @@
-﻿using JokersJunction.Shared.Models;
+﻿using JokersJunction.Shared;
+using JokersJunction.Shared.Models;
 
 namespace JokersJunction.Client.Services
 {
@@ -6,8 +7,11 @@ namespace JokersJunction.Client.Services
     {
         Task<CreateNoteResult> Create(CreateNoteModel model);
 
-        Task<GetNotesResult> GetList();
+        Task<GetNotesResult> GetList(string userId);
 
-        Task<DeleteTableResult> Delete(string notedPlayerName);
+        Task<PlayerNote> GetNoteByName(string userId, string notePlayerName);
+
+
+        Task<DeleteTableResult> Delete(string userId, string notedPlayerName);
     }
 }

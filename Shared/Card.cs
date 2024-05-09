@@ -1,14 +1,13 @@
-﻿namespace JokersJunction.Shared
-{
-    public class Card
-    {
-        public CardRank CardNumber { get; set; }
-        public CardSuit CardSuit { get; set; }
+﻿namespace JokersJunction.Shared;
 
-        public Card(CardRank cardNumber, CardSuit cardSuit)
-        {
-            CardNumber = cardNumber;
-            CardSuit = cardSuit;
-        }
+public class Card
+{
+    public CardRank CardNumber { get; set; }
+    public CardSuit CardSuit { get; set; }
+
+    public Card(CardRank cardNumber, CardSuit cardSuit)
+    {
+        CardNumber = cardNumber;
+        CardSuit = cardSuit;
     }
 }

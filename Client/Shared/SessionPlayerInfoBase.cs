@@ -42,7 +42,7 @@ namespace JokersJunction.Client.Shared
             var result = await formModal.Result;
             if (result.Cancelled) return;
 
-            GameInformation.PlayersNotes = (await PlayerNoteService.GetList()).PlayerNotes;
+            GameInformation.PlayersNotes = (await PlayerNoteService.GetList(AuthState.User.Identity?.Name ?? string.Empty)).PlayerNotes;
             StateHasChanged();
         }
     }

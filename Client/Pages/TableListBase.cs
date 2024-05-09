@@ -41,15 +41,7 @@ namespace JokersJunction.Client.Pages
 
             var result = await TableService.GetList();
 
-            if (result.Successful)
-            {
-                PokerTables = result.PokerTables;
-            }
-            else
-            {
-                ShowError = true;
-                ErrorMessage = result.Error;
-            }
+            PokerTables = result;
         }
     }
 }

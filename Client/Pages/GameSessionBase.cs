@@ -9,6 +9,8 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.SignalR.Client;
 using Newtonsoft.Json;
 using Microsoft.AspNetCore.Components.Web;
+using Microsoft.AspNetCore.Http.Connections;
+using MongoDB.Bson;
 
 namespace JokersJunction.Client.Pages
 {
@@ -27,26 +29,34 @@ namespace JokersJunction.Client.Pages
 
         private HubConnection _hubConnection;
 
-        public GameInformation GameInformation { get; set; } = new GameInformation { Players = new List<GamePlayer>() };
+        public GameInformation GameInformation { get; set; } = new() { Players = new List<GamePlayer>() };
 
         public string MessageInput { get; set; } = string.Empty;
 
-        public List<GetMessageResult> ChatMessages = new List<GetMessageResult>();
+        public List<GetMessageResult> ChatMessages = new();
 
         protected override async Task OnInitializedAsync()
         {
             AuthState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-
+            var savedToken = await LocalStorageService.GetItemAsync<string>("authToken");
             _hubConnection = new HubConnectionBuilder()
-                .WithUrl(NavigationManager.ToAbsoluteUri("/gameHub"))
-                .Build();
+                .WithUrl(NavigationManager.ToAbsoluteUri("/GameHub"),
+                    options => options.AccessTokenProvider = async () => await LocalStorageService.GetItemAsync<string>("authToken"))
+                .Build(); ;
 
 
             _hubConnection.On("ReceiveMessage", (object message) =>
             {
-                var newMessage = JsonConvert.DeserializeObject<GetMessageResult>(message.ToString());
-                ChatMessages.Add(newMessage);
-                StateHasChanged();
+                try
+                {
+                    var newMessage = JsonConvert.DeserializeObject<GetMessageResult>(message.ToString());
+                    ChatMessages.Add(newMessage);
+                    StateHasChanged();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"An error occurred while receiving a message: {ex.Message}");
+                }
             });
 
             _hubConnection.On("ReceiveStartingHand", (object hand) =>
@@ -115,9 +125,10 @@ namespace JokersJunction.Client.Pages
 
             await _hubConnection.StartAsync();
 
-            await _hubConnection.SendAsync("AddToUsers", await LocalStorageService.GetItemAsync<int>("currentTable"));
+            var tableId = await LocalStorageService.GetItemAsync<string>("currentTable");
+            await _hubConnection.SendAsync("AddToUsers", tableId);
 
-            GameInformation.PlayersNotes = (await PlayerNoteService.GetList()).PlayerNotes;
+            //GameInformation.PlayersNotes = (await PlayerNoteService.GetList(AuthState.User.Identity?.Name ?? string.Empty)).PlayerNotes;
 
             await base.OnInitializedAsync();
 

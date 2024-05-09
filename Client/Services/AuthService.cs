@@ -6,6 +6,7 @@ using Blazored.LocalStorage;
 using JokersJunction.Shared.Requests;
 using JokersJunction.Shared.Responses;
 using Microsoft.AspNetCore.Components.Authorization;
+using MongoDB.Bson;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace JokersJunction.Client.Services
@@ -17,9 +18,10 @@ namespace JokersJunction.Client.Services
         private readonly ILocalStorageService _localStorage;
 
         public AuthService(HttpClient httpClient,
-                           AuthenticationStateProvider authenticationStateProvider,
-                           ILocalStorageService localStorage)
+            AuthenticationStateProvider authenticationStateProvider,
+            ILocalStorageService localStorage)
         {
+            httpClient.BaseAddress = new Uri("https://localhost:2000/");
             _httpClient = httpClient;
             _authenticationStateProvider = authenticationStateProvider;
             _localStorage = localStorage;
@@ -27,7 +29,7 @@ namespace JokersJunction.Client.Services
 
         public async Task<RegisterResponse> Register(RegisterRequest registerModel)
         {
-            var response = await _httpClient.PostAsJsonAsync("auth/register", registerModel);
+            var response = await _httpClient.PostAsJsonAsync("gateway/auth/register", registerModel);
 
             if (response.IsSuccessStatusCode)
             {
@@ -46,7 +48,7 @@ namespace JokersJunction.Client.Services
             try
             {
                 var userName = await GetCurrentUserName();
-                var response = await _httpClient.GetAsync($"currency/balance?userName={userName}");
+                var response = await _httpClient.GetAsync($"gateway/currency/balance/{userName}");
 
                 if (response.IsSuccessStatusCode)
                 {
@@ -71,7 +73,8 @@ namespace JokersJunction.Client.Services
         public async Task<LoginResponse> Login(LoginRequest request)
         {
             var loginAsJson = JsonSerializer.Serialize(request);
-            var response = await _httpClient.PostAsync("auth/login", new StringContent(loginAsJson, Encoding.UTF8, "application/json"));
+            var response = await _httpClient.PostAsync("gateway/auth/login",
+                new StringContent(loginAsJson, Encoding.UTF8, "application/json"));
             var responseContent = await response.Content.ReadAsStringAsync();
 
             if (!response.IsSuccessStatusCode)
@@ -83,11 +86,14 @@ namespace JokersJunction.Client.Services
             {
                 try
                 {
-                    var result = JsonSerializer.Deserialize<LoginResponse>(responseContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                    var result = JsonSerializer.Deserialize<LoginResponse>(responseContent,
+                        new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
                     await _localStorage.SetItemAsync("authToken", result.Token);
-                    await _localStorage.SetItemAsync("currentTable", 0);
-                    ((ApiAuthenticationStateProvider)_authenticationStateProvider).MarkUserAsAuthenticated(result.Token);
-                    _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", result.Token);
+                    await _localStorage.SetItemAsync("currentTable", string.Empty);
+                    ((ApiAuthenticationStateProvider)_authenticationStateProvider)
+                        .MarkUserAsAuthenticated(result.Token);
+                    _httpClient.DefaultRequestHeaders.Authorization =
+                        new AuthenticationHeaderValue("bearer", result.Token);
                     return result;
                 }
                 catch (System.Text.Json.JsonException ex)
