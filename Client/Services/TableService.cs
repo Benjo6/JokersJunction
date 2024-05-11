@@ -12,7 +12,6 @@ namespace JokersJunction.Client.Services
 
         public TableService(HttpClient httpClient)
         {
-            httpClient.BaseAddress = new Uri("https://localhost:2000/");
             _httpClient = httpClient;
         }
         public async Task<CreateTableResult> Create(CreateTableModel model)

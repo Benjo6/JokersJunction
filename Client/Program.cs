@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Components.Authorization;
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
 
-builder.Services.AddTransient(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
+builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("https://localhost:2000") });
 
 builder.Services.AddOptions();
 builder.Services.AddBlazoredModal();
@@ -22,3 +22,5 @@ builder.Services.AddScoped<IStateService, StateService>();
 builder.Services.AddScoped<IPlayerNoteService, PlayerNoteService>();
 
 await builder.Build().RunAsync();
+
+

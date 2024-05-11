@@ -21,7 +21,6 @@ namespace JokersJunction.Client.Services
             AuthenticationStateProvider authenticationStateProvider,
             ILocalStorageService localStorage)
         {
-            httpClient.BaseAddress = new Uri("https://localhost:2000/");
             _httpClient = httpClient;
             _authenticationStateProvider = authenticationStateProvider;
             _localStorage = localStorage;

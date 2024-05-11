@@ -9,8 +9,6 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.SignalR.Client;
 using Newtonsoft.Json;
 using Microsoft.AspNetCore.Components.Web;
-using Microsoft.AspNetCore.Http.Connections;
-using MongoDB.Bson;
 
 namespace JokersJunction.Client.Pages
 {
@@ -40,23 +38,18 @@ namespace JokersJunction.Client.Pages
             AuthState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
             var savedToken = await LocalStorageService.GetItemAsync<string>("authToken");
             _hubConnection = new HubConnectionBuilder()
-                .WithUrl(NavigationManager.ToAbsoluteUri("/GameHub"),
-                    options => options.AccessTokenProvider = async () => await LocalStorageService.GetItemAsync<string>("authToken"))
-                .Build(); ;
+                .WithUrl(NavigationManager.ToAbsoluteUri("/GameHub"), options =>
+                {
+                    options.AccessTokenProvider = () => Task.FromResult(savedToken);
+                })
+                .Build();
 
 
             _hubConnection.On("ReceiveMessage", (object message) =>
             {
-                try
-                {
-                    var newMessage = JsonConvert.DeserializeObject<GetMessageResult>(message.ToString());
-                    ChatMessages.Add(newMessage);
-                    StateHasChanged();
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"An error occurred while receiving a message: {ex.Message}");
-                }
+                var newMessage = JsonConvert.DeserializeObject<GetMessageResult>(message.ToString() ?? string.Empty);
+                ChatMessages.Add(newMessage);
+                StateHasChanged();
             });
 
             _hubConnection.On("ReceiveStartingHand", (object hand) =>

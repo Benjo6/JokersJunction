@@ -1,5 +1,17 @@
 {
   "Routes": [
+    //{
+    //  "UpstreamPathTemplate": "/gateway/GameHub/{catchAll}",
+    //  "UpstreamHttpMethod": [ "Connect", "Get", "Post", "Options" ],
+    //  "DownstreamPathTemplate": "/GameHub/{catchAll}",
+    //  "DownstreamScheme": "wss",
+    //  "DownstreamHostAndPorts": [
+    //    {
+    //      "Host": "localhost",
+    //      "Port": 7132
+    //    }
+    //  ]
+    //},
     {
       "UpstreamPathTemplate": "/gateway/player-note/{userId}",
       "UpstreamHttpMethod": [ "Get", "Post" ],

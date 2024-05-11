@@ -1,4 +1,7 @@
 ﻿using System.Collections;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 using JokersJunction.Common.Databases.Interfaces;
 using JokersJunction.Common.Databases.Models;
 using JokersJunction.Server.Evaluators;
@@ -28,11 +31,13 @@ public class GameHub : Hub
     {
         try
         {
-            if (!await IsUserInGameHub(Context.User!.Identity!.Name)) return;
+            var username = Context.User.Identity.Name;
+            if (!await IsUserInGameHub(username)) return;
 
-            var newMessage = new GetMessageResult { Sender = Context.User!.Identity!.Name, Message = message };
+            var newMessage = new GetMessageResult { Sender = username, Message = message };
+            var tableId = await GetTableByUser(username);
 
-            await Clients.Groups(GetTableByUser(Context.User!.Identity!.Name).ToString()).SendAsync("ReceiveMessage", newMessage);
+            await Clients.Groups(tableId).SendAsync("ReceiveMessage", newMessage);
         }
         catch (Exception ex)
         {
@@ -41,11 +46,9 @@ public class GameHub : Hub
         }
     }
 
-
-
     public override async Task OnDisconnectedAsync(Exception exception)
     {
-        await DisconnectPlayer(Context.User!.Identity!.Name!);
+        await DisconnectPlayer(Context.User.Identity.Name);
         await base.OnDisconnectedAsync(exception);
     }
 
@@ -113,7 +116,7 @@ public class GameHub : Hub
 
     public async Task AddToUsers(string tableId)
     {
-        var username = Context.User!.Identity!.Name!;
+        var username = Context.User.Identity.Name;
         var users = await _databaseService.ReadAsync<User>();
         var currentTable = await _databaseService.GetOneFromIdAsync<PokerTable>(tableId);
 
@@ -165,7 +168,7 @@ public class GameHub : Hub
 
     public async Task MarkReady(int depositAmount)
     {
-        var userName = Context.User!.Identity!.Name!;
+        var userName = Context.User.Identity.Name;
         var users = await _databaseService.ReadAsync<User>();
         var games = await _databaseService.ReadAsync<Game>();
         var user = await _databaseService.GetOneByNameAsync<User>(userName);
@@ -208,7 +211,7 @@ public class GameHub : Hub
 
     public async Task UnmarkReady()
     {
-        var userName = Context.User?.Identity?.Name;
+        var userName = Context.User.Identity.Name;
         if (userName is null)
         {
             return;
@@ -373,7 +376,7 @@ public class GameHub : Hub
 
     public async Task ActionCheck()
     {
-        var userName = Context.User!.Identity!.Name;
+        var userName = Context.User.Identity.Name;
         if (userName is null)
         {
             return;
@@ -481,7 +484,7 @@ public class GameHub : Hub
         var tableId = await GetTableByUser(userName);
         var currentGame = games.First(e => e.TableId == tableId);
         var currentPlayer = currentGame.Players.First(e => e.Name == userName);
-
+            
         if (currentGame.Players.Any() &&
             currentGame.GetPlayerNameByIndex(currentGame.Index) == Context.User.Identity.Name &&
             user.Balance > currentGame.RaiseAmount - currentPlayer.RoundBet)
@@ -547,7 +550,7 @@ public class GameHub : Hub
         else
         {
             await PlayerStateRefresh(tableId);
-            await Clients.Group(tableId.ToString())
+            await Clients.Group(tableId)
                 .SendAsync("ReceiveTurnPlayer",
                     currentGame.GetPlayerNameByIndex(currentGame.Index));
         }
@@ -566,7 +569,7 @@ public class GameHub : Hub
                 currentGame.TableCards = currentGame.TableCards.Concat(flop).ToList();
                 currentGame.CommunityCardsActions++;
                 await _databaseService.ReplaceOneAsync(currentGame);
-                await Clients.Group(tableId.ToString())
+                await Clients.Group(tableId)
                     .SendAsync("ReceiveFlop", flop);
                 break;
 
@@ -575,7 +578,7 @@ public class GameHub : Hub
                 currentGame.TableCards = currentGame.TableCards.Concat(turn).ToList();
                 currentGame.CommunityCardsActions++;
                 await _databaseService.ReplaceOneAsync(currentGame);
-                await Clients.Group(tableId.ToString())
+                await Clients.Group(tableId)
                     .SendAsync("ReceiveTurnOrRiver", turn);
                 break;
 
@@ -584,7 +587,7 @@ public class GameHub : Hub
                 currentGame.TableCards = currentGame.TableCards.Concat(river).ToList();
                 currentGame.CommunityCardsActions++;
                 await _databaseService.ReplaceOneAsync(currentGame);
-                await Clients.Group(tableId.ToString())
+                await Clients.Group(tableId)
                     .SendAsync("ReceiveTurnOrRiver", river);
                 break;
 
@@ -673,7 +676,8 @@ public class GameHub : Hub
         var playerState = new PlayerStateModel();
         var users = await _databaseService.ReadAsync<User>();
         var games = await _databaseService.ReadAsync<Game>();
-        var game = games.First(e => e.TableId == tableId);
+        var game = games.FirstOrDefault(e => e.TableId == tableId);
+
 
         foreach (var user in users.Where(e => e.TableId == tableId))
         {
@@ -686,7 +690,7 @@ public class GameHub : Hub
                 GameMoney = user.Balance
             });
 
-            if (game.Players.Select(e => e.Name).Contains(user.Name))
+            if (game?.Players.Select(e => e.Name).Contains(user.Name) ?? false)
             {
                 playerState.Players.Last().ActionState = game.Players
                     .First(e => e.Name == user.Name).ActionState;
@@ -708,7 +712,7 @@ public class GameHub : Hub
 
         if (gamePlayers == null)
         {
-            await Clients.Group(tableId.ToString()).SendAsync("ReceiveStateRefresh", playerState);
+            await Clients.Group(tableId).SendAsync("ReceiveStateRefresh", playerState);
         }
         else
         {

@@ -11,7 +11,6 @@ namespace JokersJunction.Client.Services
 
         public PlayerNoteService(HttpClient httpClient)
         {
-            httpClient.BaseAddress = new Uri("https://localhost:2000/");
             _httpClient = httpClient;
         }
 

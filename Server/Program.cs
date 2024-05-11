@@ -1,10 +1,7 @@
-using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 using JokersJunction.Server.Data;
 using JokersJunction.Server.Hubs;
@@ -12,6 +9,7 @@ using JokersJunction.Server.Hubs;
 using JokersJunction.Shared.Models;
 using JokersJunction.Common.Databases.Interfaces;
 using JokersJunction.Common.Databases;
+using System.IdentityModel.Tokens.Jwt;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,6 +28,7 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<AppDbContext>();
 
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -46,7 +45,6 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 
 builder.Services.AddSignalR();
-builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
 
@@ -68,15 +66,34 @@ app.UseBlazorFrameworkFiles();
 app.UseStaticFiles();
 
 app.UseRouting();
+app.Use(async (context, next) =>
+{
+    var token = context.Request.Query["access_token"].FirstOrDefault()?.Split(" ").Last();
+    if (token != null)
+    {
+        var tokenHandler = new JwtSecurityTokenHandler();
+        var key = Encoding.ASCII.GetBytes(builder.Configuration["JwtSecurityKey"]);
+        var principal = tokenHandler.ValidateToken(token, new TokenValidationParameters
+        {
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(key),
+            ValidateIssuer = true,  // Set to true
+            ValidateAudience = true,  // Set to true
+            ValidIssuer = builder.Configuration["JwtIssuer"],  // Set to the correct value
+            ValidAudience = builder.Configuration["JwtAudience"],  // Set to the correct value
+            ClockSkew = TimeSpan.Zero
+        }, out var validatedToken);
+
+        context.User = principal;
+    }
+
+    await next();
+});
 
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.UseEndpoints(endpoints =>
-{
-    endpoints.MapControllers();
-    endpoints.MapHub<GameHub>("/GameHub");
-    endpoints.MapFallbackToFile("index.html");
-});
+app.MapHub<GameHub>("/GameHub");
+app.MapFallbackToFile("index.html");
 
 app.Run();
