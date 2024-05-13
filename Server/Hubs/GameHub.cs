@@ -664,55 +664,54 @@ public class GameHub : Hub
         try
         {
             var playerState = new PlayerStateModel();
+            var users = await _databaseService.ReadAsync<User>();
+            var games = await _databaseService.ReadAsync<Game>();
+            var game = games.FirstOrDefault(e => e.TableId == tableId);
 
-            // Fetch necessary data from the database
-            var users = await _databaseService.ReadAsync<User>(u => u.TableId == tableId);
-            var game = (await _databaseService.ReadAsync<Game>(g => g.TableId == tableId)).FirstOrDefault();
+            foreach (var item in users.Where(e => e.TableId == tableId))
+            {
+                playerState.Players.Add(new GamePlayer
+                {
+                    Username = item.Name,
+                    IsPlaying = item.InGame,
+                    IsReady = item.IsReady,
+                    SeatNumber = item.SeatNumber,
+                    GameMoney = item.Balance
+                });
+
+                if (game != null &&
+                    game.Players.Select(e => e.Name).Contains(item.Name))
+                {
+                    playerState.Players.Last().ActionState = game.Players
+                        .First(e => e.Name == item.Name).ActionState;
+                }
+            }
+
+            playerState.CommunityCards = game?.TableCards;
+
+            playerState.GameInProgress = playerState.CommunityCards != null;
+
+            playerState.Pots = game?.Winnings.ToList();
 
             if (game != null)
-            {
-                // Populate playerState.Players based on users and game state
-                foreach (var user in users)
-                {
-                    var gamePlayer = new GamePlayer
-                    {
-                        Username = user.Name,
-                        IsPlaying = user.InGame,
-                        IsReady = user.IsReady,
-                        SeatNumber = user.SeatNumber,
-                        GameMoney = user.Balance
-                    };
-
-                    var playerInGame = game.Players.FirstOrDefault(p => p.Name == user.Name);
-                    if (playerInGame != null)
-                    {
-                        gamePlayer.ActionState = playerInGame.ActionState;
-                    }
-
-                    playerState.Players.Add(gamePlayer);
-                }
-
-                // Populate other game state properties in playerState
-                playerState.CommunityCards = game.TableCards;
-                playerState.GameInProgress = playerState.CommunityCards != null;
-                playerState.Pots = game.Winnings?.ToList();
                 playerState.SmallBlind = game.SmallBlind;
+
+            if (game?.RaiseAmount > 0)
                 playerState.RaiseAmount = game.RaiseAmount;
 
-                // Send the playerState to clients
-                var gamePlayers = game.Players.ToList();
-                foreach (var user in users)
-                {
-                    var gamePlayer = gamePlayers.FirstOrDefault(p => p.Name == user.Name);
-                    playerState.HandCards = gamePlayer?.HandCards;
+            var gamePlayers = game?.Players.ToList();
 
-                    await Clients.Client(user.ConnectionId).SendAsync("ReceiveStateRefresh", playerState);
-                }
+            if (gamePlayers == null)
+            {
+                await Clients.Group(tableId).SendAsync("ReceiveStateRefresh", playerState);
             }
             else
             {
-                // No active game found for the specified tableId
-                await Clients.Group(tableId).SendAsync("ReceiveStateRefresh", playerState);
+                foreach (var c in users.Where(e => e.TableId == tableId))
+                {
+                    playerState.HandCards = gamePlayers.FirstOrDefault(e => e.Name == c.Name)?.HandCards;
+                    await Clients.Client(c.ConnectionId).SendAsync("ReceiveStateRefresh", playerState);
+                }
             }
         }
         catch (Exception ex)
