@@ -242,9 +242,9 @@ public class GameHub : Hub
         //Adding players to table
         foreach (var item in users.Where(user => user.IsReady && user.TableId == tableId))
         {
-     
             newGame.Players.Add(new Player { Name = item.Name, RoundBet = 0 });
             item.InGame = true;
+            await _databaseService.ReplaceOneAsync(item);
         }
 
         newGame.NormalizeAllIndexes();

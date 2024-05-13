@@ -12,7 +12,7 @@ public class Deck
         {
             foreach (CardSuit cardSuit in Enum.GetValues(typeof(CardSuit)))
             {
-                Cards.Enqueue(new Card(cardRank, cardSuit));
+                Cards.Enqueue(new(cardRank, cardSuit));
             }
         }
         Shuffle();
@@ -21,7 +21,7 @@ public class Deck
     public void Shuffle()
     {
         var rand = new Random();
-        Cards = new Queue<Card>(Cards.OrderBy(a => rand.Next()));
+        Cards = new(Cards.OrderBy(a => rand.Next()));
     }
 
     public List<Card> DrawCards(int number)
