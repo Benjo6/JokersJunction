@@ -14,7 +14,7 @@ using System.IdentityModel.Tokens.Jwt;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddAutoMapper(typeof(Program));
-
+builder.Services.AddLogging();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DBConnection")));
 builder.Services.AddTransient<IDatabaseService>(sp => new DatabaseService(builder.Configuration.GetConnectionString("MongoConnection")));

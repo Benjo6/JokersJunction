@@ -1,6 +1,4 @@
-﻿using MongoDB.Bson;
-
-namespace JokersJunction.Shared;
+﻿namespace JokersJunction.Shared;
 
 public class PokerTable
 {

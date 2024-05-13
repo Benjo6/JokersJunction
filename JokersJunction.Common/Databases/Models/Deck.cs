@@ -4,7 +4,7 @@ namespace JokersJunction.Common.Databases.Models;
 
 public class Deck
 {
-    private Queue<Card> _deck = new();
+    public Queue<Card> Cards { get; set; } = new();
 
     public Deck()
     {
@@ -12,7 +12,7 @@ public class Deck
         {
             foreach (CardSuit cardSuit in Enum.GetValues(typeof(CardSuit)))
             {
-                _deck.Enqueue(new Card(cardRank, cardSuit));
+                Cards.Enqueue(new Card(cardRank, cardSuit));
             }
         }
         Shuffle();
@@ -21,11 +21,11 @@ public class Deck
     public void Shuffle()
     {
         var rand = new Random();
-        _deck = new Queue<Card>(_deck.OrderBy(a => rand.Next()));
+        Cards = new Queue<Card>(Cards.OrderBy(a => rand.Next()));
     }
 
     public List<Card> DrawCards(int number)
     {
-        return Enumerable.Range(0, number).Select(i => _deck.Dequeue()).ToList();
+        return Enumerable.Range(0, number).Select(i => Cards.Dequeue()).ToList();
     }
 }

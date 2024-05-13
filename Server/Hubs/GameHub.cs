@@ -1,7 +1,4 @@
 ﻿using System.Collections;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
 using JokersJunction.Common.Databases.Interfaces;
 using JokersJunction.Common.Databases.Models;
 using JokersJunction.Server.Evaluators;
@@ -63,11 +60,8 @@ public class GameHub : Hub
             }
             var games = await _databaseService.ReadAsync<Game>();
             var tableId = user.TableId;
-            var game = games.FirstOrDefault(x => x.TableId == tableId);
-            if (game is null)
-            {
-                return;
-            }
+            var game = games.First(x => x.TableId == tableId);
+
             var smallBlindIndexTemp = 0;
 
             if (user.InGame)
@@ -85,7 +79,7 @@ public class GameHub : Hub
                     await UpdatePot(tableId);
                     await GetAndAwardWinners(tableId);
                     await PlayerStateRefresh(tableId);
-                    smallBlindIndexTemp = games.First(e => e.TableId == tableId).SmallBlindIndex;
+                    smallBlindIndexTemp = game.SmallBlindIndex;
                     await _databaseService.DeleteOneAsync(game);
                     Thread.Sleep(10000);
                 }
@@ -99,6 +93,7 @@ public class GameHub : Hub
                 e.InGame = false;
                 await _databaseService.ReplaceOneAsync(e);
             }
+            users = await _databaseService.ReadAsync<User>();
             if (users.Count(e => e.IsReady) >= 2 && games.All(e => e.TableId != tableId))
             {
                 await StartGame(tableId, smallBlindIndexTemp + 1);
@@ -146,11 +141,7 @@ public class GameHub : Hub
             InGame = false,
             Balance = 0
         });
-        users = await _databaseService.ReadAsync<User>();
-        if (users.Count(e => e.TableId == tableId) > 1)
-        {
-            await PlayerStateRefresh(tableId);
-        }
+        await PlayerStateRefresh(tableId);
     }
 
     private async Task<int> AssignTableToUser(string tableId)
@@ -178,35 +169,33 @@ public class GameHub : Hub
         }
 
         if (!await IsUserInGameHub(userName)) return;
+
         var tableId = await GetTableByUser(userName);
 
-        await Deposit(depositAmount, userName);
+        await Deposit(depositAmount, user);
 
         user.IsReady = true;
+
         await _databaseService.ReplaceOneAsync(user);
 
-
         await PlayerStateRefresh(tableId);
-
+        users = await _databaseService.ReadAsync<User>();
         if (users.Where(e => e.TableId == tableId).Count(e => e.IsReady) >= 2 && games.All(e => e.TableId != tableId))
         {
             await StartGame(tableId, 0);
         }
     }
 
-    private async Task Deposit(int depositAmount, string userName)
+    private async Task Deposit(int depositAmount, User userInGame)
     {
-        var user = await _userManager.FindByNameAsync(userName);
-        var userInGame = await _databaseService.GetOneByNameAsync<User>(userName);
+        var user = await _userManager.FindByNameAsync(userInGame.Name);
 
-        if (user is not null && userInGame is not null && user.Currency >= depositAmount)
+        if (user is not null && user.Currency >= depositAmount)
         {
             user.Currency -= depositAmount;
             await _userManager.UpdateAsync(user);
             userInGame.Balance = depositAmount;
-            await _databaseService.ReplaceOneAsync(userInGame);
         }
-
     }
 
     public async Task UnmarkReady()
@@ -216,8 +205,9 @@ public class GameHub : Hub
         {
             return;
         }
-        var user = await _databaseService.GetOneByNameAsync<User>(userName);
         if (!await IsUserInGameHub(userName)) return;
+
+        var user = await _databaseService.GetOneByNameAsync<User>(userName);
         if (user is null) return;
 
         await Withdraw(userName);
@@ -248,15 +238,13 @@ public class GameHub : Hub
         var currentTableInfo = await _databaseService.GetOneFromIdAsync<PokerTable>(tableId);
 
         var newGame = new Game(tableId, smallBlindPosition, currentTableInfo.SmallBlind);
-        _databaseService.InsertOne(newGame);
-
-        var games = await _databaseService.ReadAsync<Game>();
 
         //Adding players to table
-        foreach (var user in users.Where(user => user.IsReady && user.TableId == tableId))
+        foreach (var item in users.Where(user => user.IsReady && user.TableId == tableId))
         {
-            newGame.Players.Add(new Player { Name = user.Name, RoundBet = 0 });
-            user.InGame = true;
+     
+            newGame.Players.Add(new Player { Name = item.Name, RoundBet = 0 });
+            item.InGame = true;
         }
 
         newGame.NormalizeAllIndexes();
@@ -298,20 +286,19 @@ public class GameHub : Hub
         {
             if (users.Where(e => e.TableId == tableId && e.InGame).Select(e => e.Name).ToList().Contains(player.Name))
             {
-                player.HandCards = newGame.Deck.DrawCards(2);
+                player.HandCards.AddRange(newGame.Deck.DrawCards(2));
                 var connectionId = users.First(e => e.Name == player.Name).ConnectionId;
                 if (users.First(e => e.Name == player.Name).InGame)
                     await Clients.Client(connectionId).SendAsync("ReceiveStartingHand", player.HandCards);
             }
         }
 
-        await _databaseService.ReplaceOneAsync(newGame);
-
+        _databaseService.InsertOne(newGame);
         //Notify about the end of preparations
 
         await PlayerStateRefresh(tableId);
 
-        await Clients.Group(tableId.ToString())
+        await Clients.Group(tableId)
             .SendAsync("ReceiveTurnPlayer", newGame.GetPlayerNameByIndex(newGame.Index));
     }
 
@@ -322,9 +309,9 @@ public class GameHub : Hub
         {
             return;
         }
-        var games = await _databaseService.ReadAsync<Game>();
         if (!await IsUserInGameHub(userName)) return;
         var tableId = await GetTableByUser(userName);
+        var games = await _databaseService.ReadAsync<Game>();
         var currentGame = games.First(e => e.TableId == tableId);
 
         if (currentGame.Players.Any() &&
@@ -381,9 +368,10 @@ public class GameHub : Hub
         {
             return;
         }
-        var games = await _databaseService.ReadAsync<Game>();
         if (!await IsUserInGameHub(userName)) return;
         var tableId = await GetTableByUser(userName);
+
+        var games = await _databaseService.ReadAsync<Game>();
         var currentGame = games.First(e => e.TableId == tableId);
 
         if (currentGame.Players.Any() &&
@@ -401,11 +389,12 @@ public class GameHub : Hub
         {
             return;
         }
-        var games = await _databaseService.ReadAsync<Game>();
         var user = await _databaseService.GetOneByNameAsync<User>(userName) ?? throw new NullReferenceException("There is no user with this username");
 
         if (!await IsUserInGameHub(userName)) return;
         var tableId = await GetTableByUser(userName);
+
+        var games = await _databaseService.ReadAsync<Game>();
         var currentGame = games.First(e => e.TableId == tableId);
         var currentPlayer = currentGame.Players.First(e => e.Name == userName);
 
@@ -435,13 +424,12 @@ public class GameHub : Hub
         {
             return;
         }
-
-        var games = await _databaseService.ReadAsync<Game>();
         var user = await _databaseService.GetOneByNameAsync<User>(userName) ?? throw new NullReferenceException("No player with this username");
 
         if (!await IsUserInGameHub(userName)) return;
         var tableId = await GetTableByUser(userName);
 
+        var games = await _databaseService.ReadAsync<Game>();
         var currentGame = games.First(e => e.TableId == tableId);
         var currentPlayer = currentGame.Players.First(e => e.Name == userName);
 
@@ -477,16 +465,16 @@ public class GameHub : Hub
         {
             return;
         }
-        var games = await _databaseService.ReadAsync<Game>();
         var user = await _databaseService.GetOneByNameAsync<User>(userName) ?? throw new NullReferenceException("There is no user with this username");
 
         if (!await IsUserInGameHub(userName)) return;
         var tableId = await GetTableByUser(userName);
+        var games = await _databaseService.ReadAsync<Game>();
         var currentGame = games.First(e => e.TableId == tableId);
         var currentPlayer = currentGame.Players.First(e => e.Name == userName);
             
         if (currentGame.Players.Any() &&
-            currentGame.GetPlayerNameByIndex(currentGame.Index) == Context.User.Identity.Name &&
+            currentGame.GetPlayerNameByIndex(currentGame.Index) == userName &&
             user.Balance > currentGame.RaiseAmount - currentPlayer.RoundBet)
         {
             var allInSum = user.Balance;
@@ -543,6 +531,7 @@ public class GameHub : Hub
                 foreach (var e in users.Where(e => e.TableId == tableId))
                 {
                     e.InGame = false;
+                    await _databaseService.ReplaceOneAsync(e);
                 }
                 await PlayerStateRefresh(tableId);
             }
@@ -559,14 +548,13 @@ public class GameHub : Hub
     public async Task CommunityCardsController(string tableId)
     {
         var games = await _databaseService.ReadAsync<Game>();
-        var tempGame = games.First(e => e.TableId == tableId);
         var currentGame = games.First(e => e.TableId == tableId);
 
         switch (currentGame.CommunityCardsActions)
         {
             case CommunityCardsActions.PreFlop:
                 var flop = currentGame.Deck.DrawCards(3);
-                currentGame.TableCards = currentGame.TableCards.Concat(flop).ToList();
+                currentGame.TableCards.AddRange(flop);
                 currentGame.CommunityCardsActions++;
                 await _databaseService.ReplaceOneAsync(currentGame);
                 await Clients.Group(tableId)
@@ -575,7 +563,7 @@ public class GameHub : Hub
 
             case CommunityCardsActions.Flop:
                 var turn = currentGame.Deck.DrawCards(1);
-                currentGame.TableCards = currentGame.TableCards.Concat(turn).ToList();
+                currentGame.TableCards.AddRange(turn);
                 currentGame.CommunityCardsActions++;
                 await _databaseService.ReplaceOneAsync(currentGame);
                 await Clients.Group(tableId)
@@ -584,7 +572,7 @@ public class GameHub : Hub
 
             case CommunityCardsActions.Turn:
                 var river = currentGame.Deck.DrawCards(1);
-                currentGame.TableCards = currentGame.TableCards.Concat(river).ToList();
+                currentGame.TableCards.AddRange(river);
                 currentGame.CommunityCardsActions++;
                 await _databaseService.ReplaceOneAsync(currentGame);
                 await Clients.Group(tableId)
@@ -628,9 +616,7 @@ public class GameHub : Hub
             }
             else
             {
-                var winnings = currentGame.Winnings.ToList();
-                winnings.Add(pot);
-                currentGame.Winnings = winnings.ToArray();
+                currentGame.Winnings.Add(pot);
             }
 
             players = players.Where(e => e.RoundBet > 0).ToList();
@@ -641,9 +627,11 @@ public class GameHub : Hub
 
     private async Task GetAndAwardWinners(string tableId)
     {
-        var games = await _databaseService.ReadAsync<Game>();
         var users = await _databaseService.ReadAsync<User>();
+
+        var games = await _databaseService.ReadAsync<Game>();
         var game = games.First(e => e.TableId == tableId);
+
         var communityCards = game.TableCards;
         var evaluatedPlayers = new Hashtable();
 
@@ -673,56 +661,68 @@ public class GameHub : Hub
 
     public async Task PlayerStateRefresh(string tableId)
     {
-        var playerState = new PlayerStateModel();
-        var users = await _databaseService.ReadAsync<User>();
-        var games = await _databaseService.ReadAsync<Game>();
-        var game = games.FirstOrDefault(e => e.TableId == tableId);
-
-
-        foreach (var user in users.Where(e => e.TableId == tableId))
+        try
         {
-            playerState.Players.Add(new GamePlayer
-            {
-                Username = user.Name,
-                IsPlaying = user.InGame,
-                IsReady = user.IsReady,
-                SeatNumber = user.SeatNumber,
-                GameMoney = user.Balance
-            });
+            var playerState = new PlayerStateModel();
 
-            if (game?.Players.Select(e => e.Name).Contains(user.Name) ?? false)
+            // Fetch necessary data from the database
+            var users = await _databaseService.ReadAsync<User>(u => u.TableId == tableId);
+            var game = (await _databaseService.ReadAsync<Game>(g => g.TableId == tableId)).FirstOrDefault();
+
+            if (game != null)
             {
-                playerState.Players.Last().ActionState = game.Players
-                    .First(e => e.Name == user.Name).ActionState;
+                // Populate playerState.Players based on users and game state
+                foreach (var user in users)
+                {
+                    var gamePlayer = new GamePlayer
+                    {
+                        Username = user.Name,
+                        IsPlaying = user.InGame,
+                        IsReady = user.IsReady,
+                        SeatNumber = user.SeatNumber,
+                        GameMoney = user.Balance
+                    };
+
+                    var playerInGame = game.Players.FirstOrDefault(p => p.Name == user.Name);
+                    if (playerInGame != null)
+                    {
+                        gamePlayer.ActionState = playerInGame.ActionState;
+                    }
+
+                    playerState.Players.Add(gamePlayer);
+                }
+
+                // Populate other game state properties in playerState
+                playerState.CommunityCards = game.TableCards;
+                playerState.GameInProgress = playerState.CommunityCards != null;
+                playerState.Pots = game.Winnings?.ToList();
+                playerState.SmallBlind = game.SmallBlind;
+                playerState.RaiseAmount = game.RaiseAmount;
+
+                // Send the playerState to clients
+                var gamePlayers = game.Players.ToList();
+                foreach (var user in users)
+                {
+                    var gamePlayer = gamePlayers.FirstOrDefault(p => p.Name == user.Name);
+                    playerState.HandCards = gamePlayer?.HandCards;
+
+                    await Clients.Client(user.ConnectionId).SendAsync("ReceiveStateRefresh", playerState);
+                }
+            }
+            else
+            {
+                // No active game found for the specified tableId
+                await Clients.Group(tableId).SendAsync("ReceiveStateRefresh", playerState);
             }
         }
-
-        playerState.CommunityCards = game.TableCards.ToList();
-
-        playerState.GameInProgress = playerState.CommunityCards != null;
-
-        playerState.Pots = game.Winnings.ToList();
-
-        playerState.SmallBlind = game.SmallBlind;
-
-        if (game.RaiseAmount > 0)
-            playerState.RaiseAmount = game.RaiseAmount;
-
-        var gamePlayers = game.Players.ToList();
-
-        if (gamePlayers == null)
+        catch (Exception ex)
         {
-            await Clients.Group(tableId).SendAsync("ReceiveStateRefresh", playerState);
-        }
-        else
-        {
-            foreach (var user in users.Where(e => e.TableId == tableId))
-            {
-                playerState.HandCards = gamePlayers.FirstOrDefault(e => e.Name == user.Name)?.HandCards.ToList();
-                await Clients.Client(user.ConnectionId).SendAsync("ReceiveStateRefresh", playerState);
-            }
+            // Log the exception details
+            Console.WriteLine($"An error occurred while refreshing player state: {ex.Message}");
+            Console.WriteLine(ex.StackTrace);
         }
     }
+
 
     private async Task<string> GetTableByUser(string name)
     {

@@ -7,14 +7,14 @@ namespace JokersJunction.Common.Databases.Models;
 public class Game : Document
 {
     public Deck Deck { get; set; }
-    public List<Card> TableCards { get; set; }
+    public List<Card>? TableCards { get; set; }
     public int Index { get; set; }
     public int RoundEndIndex { get; set; }
     public int SmallBlindIndex { get; set; }
     public int BigBlindIndex { get; set; }
     public int RaiseAmount { get; set; }
     public int SmallBlind { get; set; }
-    public Pot[] Winnings { get; set; }
+    public List<Pot> Winnings { get; set; }
     public CommunityCardsActions CommunityCardsActions { get; set; }
     public string TableId { get; set; }
     public List<Player> Players { get; set; } = [];

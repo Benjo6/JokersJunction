@@ -1,7 +1,6 @@
 ﻿using JokersJunction.Shared;
 using JokersJunction.Shared.Models;
 using System.Net.Http.Json;
-using MongoDB.Bson;
 using Newtonsoft.Json;
 
 namespace JokersJunction.Client.Services
