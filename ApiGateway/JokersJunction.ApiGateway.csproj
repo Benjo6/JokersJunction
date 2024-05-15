@@ -9,7 +9,7 @@
 		<PackageReference Include="Ocelot" Version="18.0.0" />
 	</ItemGroup>
 	<ItemGroup>
-    <ProjectReference Include="..\JokersJunction.Common\JokersJunction.Common.csproj" />
+    <ProjectReference Include="..\Common\JokersJunction.Common.csproj" />
     <ProjectReference Include="..\Shared\JokersJunction.Shared.csproj" />
   </ItemGroup>
 

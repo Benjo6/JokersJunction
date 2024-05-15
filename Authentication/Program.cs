@@ -31,15 +31,18 @@ builder.Services.AddGrpcClient<Authorizer.AuthorizerClient>(options =>
 });
 
 // Add MassTransit
-builder.Services.AddMassTransit(x =>
+builder.Services.AddMassTransit(busConfigurator =>
 {
-    x.UsingRabbitMq((context, cfg) =>
+    busConfigurator.SetKebabCaseEndpointNameFormatter();
+
+    busConfigurator.UsingRabbitMq((context, configurator) =>
     {
-        cfg.Host("localhost", "/", h =>
+        configurator.Host(new Uri(builder.Configuration["MessageBroker:Host"]!), h =>
         {
-            h.Username("guest");
-            h.Password("guest");
+            h.Username(builder.Configuration["MessageBroker:Username"]);
+            h.Password(builder.Configuration["MessageBroker:Password"]);
         });
+        configurator.ConfigureEndpoints(context);
     });
 });
 
