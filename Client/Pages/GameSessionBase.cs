@@ -26,9 +26,7 @@ namespace JokersJunction.Client.Pages
         public AuthenticationState AuthState { get; set; }
 
         private HubConnection _hubConnection;
-
         public GameInformation GameInformation { get; set; } = new() { Players = new List<GamePlayer>() };
-
         public string MessageInput { get; set; } = string.Empty;
 
         public List<GetMessageResult> ChatMessages = new();
@@ -55,7 +53,7 @@ namespace JokersJunction.Client.Pages
             _hubConnection.On("ReceiveStartingHand", (object hand) =>
             {
                 var newHand = JsonConvert.DeserializeObject<List<Card>>(hand.ToString());
-                GameInformation.Hand.AddRange(newHand);
+                GameInformation.Hand = newHand;
                 StateHasChanged();
             });
 
