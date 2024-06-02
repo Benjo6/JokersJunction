@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using JokersJunction.Server.Repositories.Contracts;
+﻿using JokersJunction.Server.Repositories.Contracts;
 using JokersJunction.Shared;
 using JokersJunction.Shared.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -15,14 +14,12 @@ namespace JokersJunction.Server.Controllers
     {
         private readonly IPlayerNotesRepository _playerNotesRepository;
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly IMapper _mapper;
 
         public PlayerNoteController(IPlayerNotesRepository playerNotesRepository,
-            UserManager<ApplicationUser> userManager, IMapper mapper)
+            UserManager<ApplicationUser> userManager)
         {
             _playerNotesRepository = playerNotesRepository;
             _userManager = userManager;
-            _mapper = mapper;
         }
 
         [HttpGet]

@@ -28,15 +28,15 @@ namespace JokersJunction.Client.Services
             }
         }
 
-        public async Task<GetTablesResult> GetList()
+        public async Task<GetTablesResult<T>> GetList<T>() where T :Table
         {
-            var result = await _httpClient.GetFromJsonAsync<GetTablesResult>("api/table");
+            var result = await _httpClient.GetFromJsonAsync<GetTablesResult<T>>("api/table");
             return result;
         }
 
-        public async Task<PokerTable> GetById(int id)
+        public async Task<T> GetById<T>(int id) where T :Table
         {
-            var result = await _httpClient.GetFromJsonAsync<PokerTable>($"api/table/{id}");
+            var result = await _httpClient.GetFromJsonAsync<T>($"api/table/{id}");
             return result;
         }
 

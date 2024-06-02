@@ -1,0 +1,21 @@
+﻿@page "/blackjack-tables"
+@inherits BlackjackTableListBase
+
+
+@if (BlackjackTables == null)
+{
+    <div class="spinner"></div>
+}
+else if (!BlackjackTables.Any())
+{
+    <p>There are no tables</p>
+}
+else
+{
+    <div class="card-deck">
+        @foreach (var table in BlackjackTables)
+        {
+            <DisplayTable T="BlackjackTable" Table="table" OnChange="UpdateHandler"></DisplayTable>
+        }
+    </div>
+}

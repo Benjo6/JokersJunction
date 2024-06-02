@@ -8,13 +8,13 @@ using Microsoft.AspNetCore.Components;
 
 namespace JokersJunction.Client.Shared
 {
-    public class DisplayTableBase : ComponentBase
+    public class DisplayTableBase<T> : ComponentBase where T : Table
     {
         [Parameter]
         public EventCallback<string> OnChange { get; set; }
 
         [Parameter]
-        public PokerTable Table { get; set; }
+        public T CurrentTable { get; set; }
 
         [Inject] public ITableService TableService { get; set; }
 
@@ -27,7 +27,7 @@ namespace JokersJunction.Client.Shared
         protected async Task DeleteConfirm()
         {
             var parameters = new ModalParameters();
-            parameters.Add(nameof(Table), Table);
+            parameters.Add(nameof(CurrentTable), CurrentTable);
 
             var resultModal = ModalService.Show<TableDeletionConfirm>("Confirm", parameters);
             var result = await resultModal.Result;
@@ -40,9 +40,16 @@ namespace JokersJunction.Client.Shared
 
         protected async Task JoinTable()
         {
-            await LocalStorageService.SetItemAsync("currentTable", Table.Id);
+            await LocalStorageService.SetItemAsync("currentTable", CurrentTable.Id);
+            if (typeof(T) == typeof(BlackjackTable))
+            {
+                NavigationManager.NavigateTo("/Blackjack-Game");
+            }
 
-            NavigationManager.NavigateTo("/Game");
+            if (typeof(T) == typeof(PokerTable))
+            {
+                NavigationManager.NavigateTo("/Poker-Game");
+            }
         }
     }
 }

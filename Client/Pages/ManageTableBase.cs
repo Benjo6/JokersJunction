@@ -8,7 +8,9 @@ namespace JokersJunction.Client.Pages
     {
         [Inject] public IModalService ModalService { get; set; }
 
-        protected TableList ChildComponent;
+        protected PokerTableList PokerChildComponent;
+        protected BlackjackTableList BlackjackChildComponent;
+
 
         protected async Task ShowNewTable()
         {
@@ -17,7 +19,7 @@ namespace JokersJunction.Client.Pages
 
             if (!result.Cancelled)
             {
-                ChildComponent.Refresh();
+                PokerChildComponent.Refresh();
             }
 
         }

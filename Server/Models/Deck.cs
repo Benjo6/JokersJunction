@@ -4,7 +4,7 @@ namespace JokersJunction.Server.Models
 {
     public class Deck
     {
-        private Queue<Card> _deck = new Queue<Card>();
+        private Queue<Card> _deck = new();
 
         public Deck()
         {

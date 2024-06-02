@@ -7,9 +7,9 @@ namespace JokersJunction.Client.Services
     {
         Task<CreateTableResult> Create(CreateTableModel model);
 
-        Task<GetTablesResult> GetList();
+        Task<GetTablesResult<T>> GetList<T>() where T : Table;
 
-        Task<PokerTable> GetById(int id);
+        Task<T> GetById<T>(int id) where T:Table;
 
         Task<DeleteTableResult> Delete(int id);
     }

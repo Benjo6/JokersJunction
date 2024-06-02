@@ -1,6 +1,6 @@
-﻿@inherits GameSessionBase
+﻿@inherits BlackjackGameSessionBase
 @attribute [Authorize(Roles = "User")]
-@page "/Game"
+@page "/Blackjack-Game"
 
 @if (GameInformation == null)
 {
@@ -71,22 +71,13 @@ else
                     <button @onclick="@UnmarkReady" class="btn btn-primary m-1">Leave game</button>
                 }
                 <button @onclick="@LeaveTable" class="btn btn-danger m-1">Leave table</button>
-            </div>
-            <div class="col-md-6 align-content-end text-right">
+
                 @if (GameInformation.GameInProgress && GameInformation.CurrentPlayer == AuthState.User.Identity.Name)
                 {
-                    @if (GameInformation.RaiseAmount > 0)
-                    {
-                        <button @onclick="@Call" class="btn btn-primary m-1">Call</button>
-                    }
-                    else
-                    {
-                        <button @onclick="@Check" class="btn btn-primary m-1">Check</button>
-                    }
-                    <button @onclick="@Fold" class="btn btn-primary m-1">Fold</button>
-                    <input @bind="@GameInformation.PlayerRaise" type="number" class="form-control col-md-4 m-1">
-                    <button @onclick="@Raise" class="btn btn-primary m-1">Raise</button>
-                    <button @onclick="@AllIn" class="btn btn-primary m-1">All-In</button>
+                    <button @onclick="@Hit" class="btn btn-primary m-1">Hit</button>
+                    <button @onclick="@Stand" class="btn btn-primary m-1">Stand</button>
+                    <input @bind="@GameInformation.PlayerBet" type="number" class="form-control col-md-4 m-1" placeholder="Bet Amount">
+                    <button @onclick="@Bet" class="btn btn-primary m-1">Bet</button>
                 }
             </div>
         </div>

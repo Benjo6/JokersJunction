@@ -13,31 +13,33 @@ namespace JokersJunction.Server.Repositories
         {
             _appDbContext = appDbContext;
         }
-        public async Task<IEnumerable<PokerTable>> GetTables()
+
+        public async Task<IEnumerable<T>> GetTables<T>() where T : Table
         {
-            return await _appDbContext.PokerTables.ToListAsync();
+            return await _appDbContext.Set<T>().ToListAsync();
         }
 
-        public async Task<PokerTable> GetTableById(int tableId)
+
+        public async Task<T> GetTableById<T>(int tableId) where T: Table
         {
-            return await _appDbContext.PokerTables.FirstOrDefaultAsync(e => e.Id == tableId);
+            return await _appDbContext.Set<T>().FirstOrDefaultAsync(e => e.Id == tableId);
         }
 
-        public async Task<PokerTable> GetTableByName(string tableName)
+        public async Task<T> GetTableByName<T>(string tableName) where T: Table
         {
-            return await _appDbContext.PokerTables.FirstOrDefaultAsync(e => e.Name == tableName);
+            return await _appDbContext.Set<T>().FirstOrDefaultAsync(e => e.Name == tableName);
         }
 
-        public async Task<PokerTable> AddTable(PokerTable table)
+        public async Task<T> AddTable<T>(T table) where T: Table
         {
-            var result = await _appDbContext.PokerTables.AddAsync(table);
+            var result = await _appDbContext.Set<T>().AddAsync(table);
             await _appDbContext.SaveChangesAsync();
             return result.Entity;
         }
 
-        public async Task<PokerTable> UpdateTable(PokerTable table)
+        public async Task<T> UpdateTable<T>(T table) where T : Table
         {
-            var result = await _appDbContext.PokerTables.FirstOrDefaultAsync(e => e.Id == table.Id);
+            var result = await _appDbContext.Set<T>().FirstOrDefaultAsync(e => e.Id == table.Id);
 
             if (result == null) return null;
 
@@ -48,12 +50,12 @@ namespace JokersJunction.Server.Repositories
 
         }
 
-        public async Task<PokerTable> DeleteTable(int tableId)
+        public async Task<T> DeleteTable<T>(int tableId) where T: Table
         {
-            var result = await _appDbContext.PokerTables.FirstOrDefaultAsync(e => e.Id == tableId);
+            var result = await _appDbContext.Set<T>().FirstOrDefaultAsync(e => e.Id == tableId);
             if (result == null) return null;
 
-            _appDbContext.PokerTables.Remove(result);
+            _appDbContext.Set<T>().Remove(result);
             await _appDbContext.SaveChangesAsync();
             return result;
         }

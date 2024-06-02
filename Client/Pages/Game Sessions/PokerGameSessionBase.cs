@@ -12,7 +12,7 @@ using Microsoft.AspNetCore.Components.Web;
 
 namespace JokersJunction.Client.Pages
 {
-    public class GameSessionBase : ComponentBase
+    public class PokerGameSessionBase : ComponentBase
     {
         [Inject] public IStateService StateService { get; set; }
         [Inject] public IModalService ModalService { get; set; }
@@ -27,11 +27,11 @@ namespace JokersJunction.Client.Pages
 
         private HubConnection _hubConnection;
 
-        public GameInformation GameInformation { get; set; } = new GameInformation { Players = new List<GamePlayer>() };
+        public PokerGameInformation GameInformation { get; set; } = new() { Players = new List<GamePlayer>() };
 
         public string MessageInput { get; set; } = string.Empty;
 
-        public List<GetMessageResult> ChatMessages = new List<GetMessageResult>();
+        public List<GetMessageResult> ChatMessages = new();
 
         protected override async Task OnInitializedAsync()
         {

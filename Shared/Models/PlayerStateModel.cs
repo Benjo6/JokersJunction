@@ -19,4 +19,16 @@
             SmallBlind = 0;
         }
     }
+
+    public class BlackjackPlayerStateModel
+    {
+        public List<GamePlayer> Players { get; set; }
+        public List<Card> HandCards { get; set; }
+        public bool GameInProgress { get; set; }
+        public BlackjackPlayerStateModel()
+        {
+            Players = new List<GamePlayer>();
+            HandCards = new List<Card>();
+        }
+    }
 }

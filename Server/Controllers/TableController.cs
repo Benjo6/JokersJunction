@@ -3,7 +3,6 @@ using JokersJunction.Server.Repositories.Contracts;
 using JokersJunction.Shared;
 using JokersJunction.Shared.Models;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace JokersJunction.Server.Controllers
@@ -14,31 +13,28 @@ namespace JokersJunction.Server.Controllers
     {
         private readonly ITableRepository _tableRepository;
         private readonly IMapper _mapper;
-        private readonly UserManager<ApplicationUser> _userManager;
 
         public TableController(ITableRepository tableRepository,
-            IMapper mapper,
-            UserManager<ApplicationUser> userManager)
+            IMapper mapper)
         {
             _tableRepository = tableRepository;
             _mapper = mapper;
-            _userManager = userManager;
         }
 
         [HttpGet]
-        public async Task<ActionResult<GetTablesResult>> GetTables()
+        public async Task<ActionResult<GetTablesResult<T>>> GetTables<T>() where T : Table
         {
             try
             {
-                return (new GetTablesResult
+                return (new GetTablesResult<T>
                 {
                     Successful = true,
-                    PokerTables = await _tableRepository.GetTables()
+                    Tables = await _tableRepository.GetTables<T>()
                 });
             }
             catch (Exception)
             {
-                return (new GetTablesResult
+                return (new GetTablesResult<T>
                 {
                     Successful = false,
                     Error = "Error processing request"
@@ -48,7 +44,7 @@ namespace JokersJunction.Server.Controllers
 
         //[Authorize(Roles = "Admin")]
         [HttpPost]
-        public async Task<ActionResult<CreateTableResult>> Create([FromBody] CreateTableModel model)
+        public async Task<ActionResult<CreateTableResult>> Create<T>([FromBody] CreateTableModel model) where T : Table
         {
             try
             {
@@ -61,7 +57,7 @@ namespace JokersJunction.Server.Controllers
                     };
                 }
 
-                var table = await _tableRepository.GetTableByName(model.Name);
+                var table = await _tableRepository.GetTableByName<T>(model.Name);
 
                 if (table != null)
                 {
@@ -90,26 +86,26 @@ namespace JokersJunction.Server.Controllers
         }
 
         [HttpGet("{id:int}")]
-        public async Task<ActionResult<PokerTable>> GetTableById(int id)
+        public async Task<ActionResult<T>> GetTableById<T>(int id) where T : Table
         {
             try
             {
-                return await _tableRepository.GetTableById(id);
+                return await _tableRepository.GetTableById<T>(id);
             }
             catch (Exception)
             {
-                return new PokerTable();
+                return NotFound();
                 // ignored
             }
         }
 
         //[Authorize(Roles = "Admin")]
         [HttpPost("delete")]
-        public async Task<ActionResult<DeleteTableResult>> DeleteTable([FromBody]int tableId)
+        public async Task<ActionResult<DeleteTableResult>> DeleteTable<T>([FromBody]int tableId) where T: Table
         {
             try
             {
-                await _tableRepository.DeleteTable(tableId);
+                await _tableRepository.DeleteTable<T>(tableId);
                 return (new DeleteTableResult
                 {
                     Successful = true
