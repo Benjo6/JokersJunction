@@ -8,10 +8,12 @@
 
   <ItemGroup>
     <PackageReference Include="MassTransit.Abstractions" Version="8.2.2" />
+    <PackageReference Include="MassTransit.RabbitMQ" Version="8.2.2" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Common\JokersJunction.Common.csproj" />
+    <ProjectReference Include="..\Server\JokersJunction.Server.csproj" />
     <ProjectReference Include="..\Shared\JokersJunction.Shared.csproj" />
   </ItemGroup>
 

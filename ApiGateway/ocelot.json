@@ -1,6 +1,42 @@
 {
   "Routes": [
     {
+      "UpstreamPathTemplate": "/gateway/game/unmark-ready/{username}",
+      "UpstreamHttpMethod": [ "Post" ],
+      "DownstreamPathTemplate": "/api/game/unmark-ready/{username}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7123
+        }
+      ]
+    },
+    {
+      "UpstreamPathTemplate": "/gateway/game/mark-ready/{username}",
+      "UpstreamHttpMethod": [ "Post" ],
+      "DownstreamPathTemplate": "/api/game/mark-ready/{username}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7123
+        }
+      ]
+    },
+    {
+      "UpstreamPathTemplate": "/gateway/game-user/add-users/{connectionId}",
+      "UpstreamHttpMethod": [ "Post" ],
+      "DownstreamPathTemplate": "/api/game-user/add-users/{connectionId}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7265
+        }
+      ]
+    },
+    {
       "UpstreamPathTemplate": "/gateway/player-note/{userId}",
       "UpstreamHttpMethod": [ "Get", "Post" ],
       "DownstreamPathTemplate": "/api/player-note/{userId}",

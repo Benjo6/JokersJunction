@@ -1,9 +1,6 @@
-﻿using JokersJunction.Common.Databases;
-using JokersJunction.Common.Databases.Interfaces;
+﻿using JokersJunction.Common.Databases.Interfaces;
 using JokersJunction.Common.Databases.Models;
 using JokersJunction.Table.Repositories.Interfaces;
-using Microsoft.EntityFrameworkCore;
-using MongoDB.Bson;
 
 namespace JokersJunction.Table.Repositories
 {
