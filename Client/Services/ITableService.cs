@@ -1,5 +1,6 @@
 ﻿using JokersJunction.Shared;
 using JokersJunction.Shared.Models;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace JokersJunction.Client.Services
 {
@@ -7,9 +8,9 @@ namespace JokersJunction.Client.Services
     {
         Task<CreateTableResult> Create(CreateTableModel model);
 
-        Task<List<PokerTable>> GetList();
+        Task<List<T>> GetList<T>() where T : UiTable;
 
-        Task<PokerTable> GetById(string id);
+        Task<T> GetById<T>(int id) where T : UiTable;
 
         Task<DeleteTableResult> Delete(string id);
     }

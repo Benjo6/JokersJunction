@@ -2,7 +2,7 @@
 using JokersJunction.Common.Events;
 using MassTransit;
 
-namespace JokersJunction.MatchMaker.Features;
+namespace JokersJunction.GameUser.Features;
 
 public class UserDepositEventConsumer : IConsumer<UserDepositEvent>
 {

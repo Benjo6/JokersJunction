@@ -2,17 +2,17 @@
 using Blazored.Modal.Services;
 using JokersJunction.Client.Components;
 using JokersJunction.Client.Services;
-using JokersJunction.Shared.Models;
 using JokersJunction.Shared;
+using JokersJunction.Shared.Models;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.SignalR.Client;
 using Newtonsoft.Json;
-using Microsoft.AspNetCore.Components.Web;
 
-namespace JokersJunction.Client.Pages
+namespace JokersJunction.Client.Pages.Game_Sessions
 {
-    public class GameSessionBase : ComponentBase
+    public class PokerGameSessionBase : ComponentBase
     {
         [Inject] public IStateService StateService { get; set; }
         [Inject] public IModalService ModalService { get; set; }
@@ -26,11 +26,9 @@ namespace JokersJunction.Client.Pages
         public AuthenticationState AuthState { get; set; }
 
         private HubConnection _hubConnection;
-        public GameInformation GameInformation { get; set; } = new() { Players = new List<GamePlayer>() };
-        public string MessageInput { get; set; } = string.Empty;
+        public PokerGameInformation GameInformation { get; set; } = new() { Players = new List<GamePlayer>() }; public string MessageInput { get; set; } = string.Empty;
 
         public List<GetMessageResult> ChatMessages = new();
-
         protected override async Task OnInitializedAsync()
         {
             AuthState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
@@ -87,7 +85,7 @@ namespace JokersJunction.Client.Pages
 
             _hubConnection.On("ReceiveStateRefresh", (object playerState) =>
             {
-                var playerStateModel = JsonConvert.DeserializeObject<PlayerStateModel>(playerState.ToString());
+                var playerStateModel = JsonConvert.DeserializeObject<PokerPlayerStateModel>(playerState.ToString());
 
                 GameInformation.Players = playerStateModel.Players;
                 GameInformation.TableCards = playerStateModel.CommunityCards ?? new List<Card>();
@@ -117,7 +115,7 @@ namespace JokersJunction.Client.Pages
             await _hubConnection.StartAsync();
 
             var tableId = await LocalStorageService.GetItemAsync<string>("currentTable");
-            await _hubConnection.SendAsync("AddToUsers", tableId);
+            await _hubConnection.SendAsync("AddToUsers", tableId, TableType.Poker);
 
             //GameInformation.PlayersNotes = (await PlayerNoteService.GetList(AuthState.User.Identity?.Name ?? string.Empty)).PlayerNotes;
 

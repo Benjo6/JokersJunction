@@ -1,24 +1,23 @@
 ﻿using JokersJunction.Common.Events;
 using JokersJunction.GameManagement.Services.Contracts;
-using JokersJunction.Server.Responses;
-using JokersJunction.Shared;
-using JokersJunction.Shared.Models;
 using MassTransit;
-using Microsoft.AspNetCore.SignalR;
 
-namespace JokersJunction.MatchMaker.Features;
+namespace JokersJunction.GameManagement.Features;
 
-public class PlayerStateRefreshEventConsumer : IConsumer<PlayerStateRefreshEvent>
+public class PlayerStateRefreshEventConsumer : IConsumer<PokerPlayerStateRefreshEvent>, IConsumer<BlackjackPlayerStateRefreshEvent>
 {
     private readonly IGameService _gameService;
     public PlayerStateRefreshEventConsumer( IGameService gameService)
     {
         _gameService = gameService;
     }
-
-    public async Task Consume(ConsumeContext<PlayerStateRefreshEvent> context)
+    public async Task Consume(ConsumeContext<PokerPlayerStateRefreshEvent> context)
     {
-        await _gameService.PlayerStateRefresh(context.Message.TableId, context.Message.Users, context.Message.Games);
+        await _gameService.PokerPlayerStateRefresh(context.Message.TableId, context.Message.Games);
+    }
 
+    public async Task Consume(ConsumeContext<BlackjackPlayerStateRefreshEvent> context)
+    {
+        await _gameService.BlackjackPlayerStateRefresh(context.Message.TableId);
     }
 }

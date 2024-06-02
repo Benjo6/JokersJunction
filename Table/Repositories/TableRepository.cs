@@ -11,31 +11,31 @@ namespace JokersJunction.Table.Repositories
         {
             _databaseService = databaseService;
         }
-        public async Task<List<PokerTable>> GetTables()
+        public async Task<List<T>> GetTables<T>() where T : Common.Databases.Models.Inheritor.Table
         {
-            return await _databaseService.ReadAsync<PokerTable>();
+            return await _databaseService.ReadAsync<T>();
         }
 
-        public async Task<PokerTable?> GetTableById(string tableId)
+        public async Task<T?> GetTableById<T>(string tableId) where T : Common.Databases.Models.Inheritor.Table
         {
-            return await _databaseService.GetOneFromIdAsync<PokerTable>(tableId);
+            return await _databaseService.GetOneFromIdAsync<T>(tableId);
         }
 
-        public async Task<PokerTable?> GetTableByName(string tableName)
+        public async Task<T?> GetTableByName<T>(string tableName) where T : Common.Databases.Models.Inheritor.Table
         {
-            return await _databaseService.GetOneByNameAsync<PokerTable>(tableName);
+            return await _databaseService.GetOneByNameAsync<T>(tableName);
         }
 
-        public async Task<PokerTable> AddTable(PokerTable table)
+        public async Task<T> AddTable<T>(T table) where T : Common.Databases.Models.Inheritor.Table
         {
             _databaseService.InsertOne(table);
-            return await _databaseService.GetOneByNameAsync<PokerTable>(table.Name);
+            return await _databaseService.GetOneByNameAsync<T>(table.Name);
         }
 
-        public async Task<PokerTable> UpdateTable(PokerTable table)
+        public async Task<T> UpdateTable<T>(T table) where T : Common.Databases.Models.Inheritor.Table
         {
             await _databaseService.ReplaceOneAsync(table);
-            return await _databaseService.GetOneByNameAsync<PokerTable>(table.Name);
+            return await _databaseService.GetOneByNameAsync<T>(table.Name);
         }
 
         public async Task<bool> DeleteTable(string tableId)

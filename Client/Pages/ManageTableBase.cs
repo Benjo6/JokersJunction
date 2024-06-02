@@ -1,6 +1,7 @@
 ﻿using Blazored.Modal.Services;
 using Microsoft.AspNetCore.Components;
 using JokersJunction.Client.Components;
+using JokersJunction.Client.Pages.Table_Lists;
 
 namespace JokersJunction.Client.Pages
 {
@@ -8,8 +9,8 @@ namespace JokersJunction.Client.Pages
     {
         [Inject] public IModalService ModalService { get; set; }
 
-        protected TableList ChildComponent;
-
+        protected PokerTableList PokerChildComponent;
+        protected BlackjackTableList BlackjackChildComponent;
         protected async Task ShowNewTable()
         {
             var resultModal = ModalService.Show<NewTable>("Create New Table");
@@ -17,11 +18,9 @@ namespace JokersJunction.Client.Pages
 
             if (!result.Cancelled)
             {
-                ChildComponent.Refresh();
+                PokerChildComponent.Refresh();
             }
 
         }
     }
-
-
 }

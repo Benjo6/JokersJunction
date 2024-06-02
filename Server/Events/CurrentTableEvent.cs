@@ -1,6 +1,11 @@
 ﻿namespace JokersJunction.Server.Events;
 
-public class CurrentTableEvent
+public class CurrentPokerTableEvent
+{
+    public string TableId { get; set; }
+}
+
+public class CurrentBlackjackTableEvent
 {
     public string TableId { get; set; }
 }

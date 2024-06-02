@@ -1,6 +1,5 @@
 using JokersJunction.PlayerProfile.Repositories;
 using JokersJunction.PlayerProfile.Repositories.Interfaces;
-using JokersJunction.Server.Data;
 using JokersJunction.Shared.Data;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;

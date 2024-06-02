@@ -1,34 +1,33 @@
 ﻿using Blazored.Modal.Services;
-using JokersJunction.Client.Services;
 using JokersJunction.Client.Shared;
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Authorization;
 
-namespace JokersJunction.Client.Components
+namespace JokersJunction.Client.Pages;
+
+public class HomePageBase : ComponentBase
 {
-    public class HomePageBase : ComponentBase
+    [Inject] public IModalService ModalService { get; set; }
+    [Inject] public NavigationManager NavigationManager { get; set; }
+
+    protected async Task LogOut()
     {
-        [Inject] public IModalService ModalService { get; set; }
-        [Inject] public NavigationManager NavigationManager { get; set; }
+        var resultModal = ModalService.Show<LogOut>("Log Out");
+        var result = await resultModal.Result;
 
-
-
-
-
-        protected async Task LogOut()
+        if (!result.Cancelled)
         {
-            var resultModal = ModalService.Show<LogOut>("Log Out");
-            var result = await resultModal.Result;
-
-            if (!result.Cancelled)
-            {
-                StateHasChanged();
-            }
+            StateHasChanged();
         }
+    }
 
-        protected void NavigateToTableList(){
-            NavigationManager.NavigateTo("/tableList");
-        }
+    protected void NavigateToPokerTables()
+    {
+        NavigationManager.NavigateTo("/poker-tables");
+    }
+
+    protected void NavigateToBlackjackTables()
+    {
+        NavigationManager.NavigateTo("/blackjack-tables");
 
     }
 }

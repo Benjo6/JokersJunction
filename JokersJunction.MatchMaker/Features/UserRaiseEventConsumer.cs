@@ -1,9 +1,8 @@
 ﻿using JokersJunction.Common.Databases.Interfaces;
-using JokersJunction.Common.Databases.Models;
 using JokersJunction.Common.Events;
 using MassTransit;
 
-namespace JokersJunction.MatchMaker.Features;
+namespace JokersJunction.GameUser.Features;
 
 public class UserRaiseEventConsumer : IConsumer<UserRaiseEvent>
 {

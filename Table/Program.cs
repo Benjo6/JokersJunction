@@ -18,7 +18,8 @@ builder.Services.AddScoped<ITableRepository, TableRepository>();
 builder.Services.AddMassTransit(busConfigurator =>
 {
     busConfigurator.SetKebabCaseEndpointNameFormatter();
-    busConfigurator.AddConsumer<CurrentTableEventConsumer>();
+    busConfigurator.AddConsumer<CurrentPokerTableEventConsumer>();
+    busConfigurator.AddConsumer<CurrentBlackjackTableEventConsumer>();
     busConfigurator.UsingRabbitMq((context, configurator) =>
     {
         configurator.Host(new Uri(builder.Configuration["MessageBroker:Host"]!), h =>
@@ -27,9 +28,13 @@ builder.Services.AddMassTransit(busConfigurator =>
             h.Password(builder.Configuration["MessageBroker:Password"]);
         });
 
-        configurator.ReceiveEndpoint("current_table_queue", e =>
+        configurator.ReceiveEndpoint("current_poker_table_queue", e =>
         {
-            e.ConfigureConsumer<CurrentTableEventConsumer>(context);
+            e.ConfigureConsumer<CurrentPokerTableEventConsumer>(context);
+        });
+        configurator.ReceiveEndpoint("current_blackjack_table_queue", e =>
+        {
+            e.ConfigureConsumer<CurrentBlackjackTableEventConsumer>(context);
         });
         configurator.ConfigureEndpoints(context);
     });

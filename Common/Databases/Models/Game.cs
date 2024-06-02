@@ -6,13 +6,15 @@ namespace JokersJunction.Common.Databases.Models;
 
 public class Game : Document
 {
-    public Deck Deck { get; set; }
+    public string TableId { get; set; }
+    public Deck Deck { get; set; } = new();
+}
+
+public class PokerGame : Game
+{
     public List<Card> TableCards { get; set; }
 
-    public List<Player> Players { get; set; }
-
-    public string TableId { get; set; }
-
+    public List<PokerPlayer> Players { get; set; }
     public int Index { get; set; }
 
     public int RoundEndIndex { get; set; }
@@ -29,13 +31,13 @@ public class Game : Document
 
     public CommunityCardsActions CommunityCardsActions { get; set; }
 
-    public Game(string tableId, int smallBlindIndex, int smallBlind)
+    public PokerGame(string tableId, int smallBlindIndex, int smallBlind)
     {
         TableId = tableId;
-        Players = new();
-        TableCards = new();
-        Winnings = new();
-        Deck = new();
+        Players = new List<PokerPlayer>();
+        TableCards = new List<Card>();
+        Winnings = new List<Pot>();
+        Deck = new Deck();
         SmallBlindIndex = smallBlindIndex;
         BigBlindIndex = smallBlindIndex + 1;
         RoundEndIndex = smallBlindIndex + 2;
@@ -44,6 +46,7 @@ public class Game : Document
         SmallBlind = smallBlind;
         RaiseAmount = SmallBlind * 2;
     }
+
     public int NormalizeIndex(int index)
     {
         return index % Players.Count;
@@ -69,11 +72,57 @@ public class Game : Document
 
     public string GetPlayerNameByIndex(int index)
     {
-        return Players.ElementAt(index)?.Name;
+        return Players.ElementAt(index).Name;
     }
 
-    public Player GetPlayerByIndex(int index)
+    public PokerPlayer GetPlayerByIndex(int index)
     {
         return Players.ElementAt(index);
+    }
+}
+public class BlackjackGame : Game
+{
+    public List<BlackjackPlayer> Players { get; set; } = new();
+    public List<Card> DealerHand { get; set; } = new();
+    public bool IsGameOver { get; set; } = false;
+    public int InitialBet { get; set; }
+
+    public BlackjackGame(string tableId, int initialBet)
+    {
+        TableId = tableId;
+        InitialBet = initialBet;
+        Deck.Shuffle();
+        DealerHand.AddRange(Deck.DrawCards(2));
+    }
+
+    public int GetDealerHandValue()
+    {
+        var value = 0;
+        var aceCount = 0;
+
+        foreach (var card in DealerHand)
+        {
+            if (card.CardNumber == CardRank.Ace)
+            {
+                aceCount++;
+                value += 11;
+            }
+            else if (card.CardNumber == CardRank.King || card.CardNumber == CardRank.Queen || card.CardNumber == CardRank.Jack)
+            {
+                value += 10;
+            }
+            else
+            {
+                value += (int)card.CardNumber;
+            }
+        }
+
+        while (value > 21 && aceCount > 0)
+        {
+            value -= 10;
+            aceCount--;
+        }
+
+        return value;
     }
 }

@@ -37,6 +37,18 @@
       ]
     },
     {
+      "UpstreamPathTemplate": "/gateway/game-user/disconnect-user/{username}",
+      "UpstreamHttpMethod": [ "Post" ],
+      "DownstreamPathTemplate": "/api/game-user/disconnect-user/{username}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7265
+        }
+      ]
+    },
+    {
       "UpstreamPathTemplate": "/gateway/player-note/{userId}",
       "UpstreamHttpMethod": [ "Get", "Post" ],
       "DownstreamPathTemplate": "/api/player-note/{userId}",
@@ -121,7 +133,6 @@
       ]
     },
     {
-
       "UpstreamPathTemplate": "/gateway/table",
       "UpstreamHttpMethod": [ "Get" ],
       "DownstreamPathTemplate": "/api/table",
@@ -190,6 +201,114 @@
         {
           "Host": "localhost",
           "Port": 7017
+        }
+      ]
+    },
+    {
+      "UpstreamPathTemplate": "/gateway/game/action-fold/{username}",
+      "UpstreamHttpMethod": [ "Post" ],
+      "DownstreamPathTemplate": "/api/game/action-fold/{username}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7265
+        }
+      ]
+    },
+    {
+      "UpstreamPathTemplate": "/gateway/game/action-check/{username}",
+      "UpstreamHttpMethod": [ "Post" ],
+      "DownstreamPathTemplate": "/api/game/action-check/{username}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7265
+        }
+      ]
+    },
+    {
+      "UpstreamPathTemplate": "/gateway/game/action-raise/{username}",
+      "UpstreamHttpMethod": [ "Post" ],
+      "DownstreamPathTemplate": "/api/game/action-raise/{username}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7265
+        }
+      ]
+    },
+    {
+      "UpstreamPathTemplate": "/gateway/game/action-call/{username}",
+      "UpstreamHttpMethod": [ "Post" ],
+      "DownstreamPathTemplate": "/api/game/action-call/{username}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7265
+        }
+      ]
+    },
+    {
+      "UpstreamPathTemplate": "/gateway/game/action-all-in/{username}",
+      "UpstreamHttpMethod": [ "Post" ],
+      "DownstreamPathTemplate": "/api/game/action-all-in/{username}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7265
+        }
+      ]
+    },
+    {
+      "UpstreamPathTemplate": "/gateway/game/start-blackjack-game/{tableId}",
+      "UpstreamHttpMethod": [ "Post" ],
+      "DownstreamPathTemplate": "/api/game/start-blackjack-game/{tableId}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7265
+        }
+      ]
+    },
+    {
+      "UpstreamPathTemplate": "/gateway/game/blackjack-game-hit/{playerName}",
+      "UpstreamHttpMethod": [ "Post" ],
+      "DownstreamPathTemplate": "/api/game/blackjack-game-hit/{playerName}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7265
+        }
+      ]
+    },
+    {
+      "UpstreamPathTemplate": "/gateway/game/blackjack-game-stand/{playerName}",
+      "UpstreamHttpMethod": [ "Post" ],
+      "DownstreamPathTemplate": "/api/game/blackjack-game-stand/{playerName}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7265
+        }
+      ]
+    },
+    {
+      "UpstreamPathTemplate": "/gateway/game/blackjack-bet/{playerName}",
+      "UpstreamHttpMethod": [ "Post" ],
+      "DownstreamPathTemplate": "/api/game/blackjack-bet/{playerName}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7265
         }
       ]
     }

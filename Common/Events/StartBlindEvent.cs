@@ -8,5 +8,5 @@ public class StartBlindEvent
     public int SmallBlind { get; set; }
     public string BigBlindName { get; set; }
     public int BigBlind { get; set; }
-    public List<Player> Players { get; set; } = new();
+    public List<PokerPlayer> Players { get; set; } = new();
 }

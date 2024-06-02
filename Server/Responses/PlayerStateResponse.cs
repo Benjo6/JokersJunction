@@ -3,10 +3,17 @@ using JokersJunction.Shared.Models;
 
 namespace JokersJunction.Server.Responses;
 
-public class PlayerStateResponse
+public class PokerPlayerStateResponse
 {
     public string TableId { get; set; }
-    public PlayerStateModel PlayerStateModel { get; set; }
-    public List<Player>? GamePlayers { get; set; }
+    public PokerPlayerStateModel PlayerStateModel { get; set; }
+    public List<PokerPlayer>? GamePlayers { get; set; }
+    public IEnumerable<User> TableUsers { get; set; }
+}
+public class BlackjackPlayerStateResponse
+{
+    public string TableId { get; set; }
+    public BlackjackPlayerStateModel PlayerStateModel { get; set; }
+    public List<BlackjackPlayer>? GamePlayers { get; set; }
     public IEnumerable<User> TableUsers { get; set; }
 }

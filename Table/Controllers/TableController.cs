@@ -1,9 +1,8 @@
-using AutoMapper;
 using JokersJunction.Shared;
 using JokersJunction.Shared.Models;
 using JokersJunction.Table.Repositories.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using MongoDB.Bson;
+using PokerTable = JokersJunction.Shared.PokerTable;
 
 namespace JokersJunction.Table.Controllers;
 
@@ -21,20 +20,33 @@ public class TableController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetTables()
+    public async Task<IActionResult> GetTables<T>() where T : class
     {
         try
         {
-            var pokerTables = await _tableRepository.GetTables();
-            var mappedPokerTables = pokerTables.Select(pt => new PokerTable
+            if (typeof(T) == typeof(PokerTable))
+            {
+                var pokerTables = await _tableRepository.GetTables<Common.Databases.Models.PokerTable>();
+
+                var mappedPokerTables = pokerTables.Select(pt => new PokerTable
+                {
+                    Id = pt.Id.ToString(),
+                    Name = pt.Name,
+                    MaxPlayers = pt.MaxPlayers,
+                    SmallBlind = pt.SmallBlind
+                }).ToList();
+                return Ok(mappedPokerTables);
+            }
+            var blackjackTables = await _tableRepository.GetTables<Common.Databases.Models.BlackjackTable>();
+
+            var mappedBlackJackTables = blackjackTables.Select(pt => new BlackjackTable()
             {
                 Id = pt.Id.ToString(),
                 Name = pt.Name,
                 MaxPlayers = pt.MaxPlayers,
-                SmallBlind = pt.SmallBlind
             }).ToList();
 
-            return Ok(mappedPokerTables);
+            return Ok(mappedBlackJackTables);
         }
         catch (Exception ex)
         {
@@ -43,9 +55,8 @@ public class TableController : ControllerBase
         }
     }
 
-    //[Authorize(Roles = "Admin")]
     [HttpPost("Create")]
-    public async Task<IActionResult> Create([FromBody] CreateTableModel? request)
+    public async Task<IActionResult> Create<T>([FromBody] CreateTableModel request) where T : Common.Databases.Models.Inheritor.Table
     {
         try
         {
@@ -58,7 +69,7 @@ public class TableController : ControllerBase
                 });
             }
 
-            var existingTable = await _tableRepository.GetTableByName(request.Name);
+            var existingTable = await _tableRepository.GetTableByName<T>(request.Name);
             if (existingTable != null)
             {
                 return Ok(new CreateTableResult
@@ -92,11 +103,11 @@ public class TableController : ControllerBase
 
 
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetTableById(string id)
+    public async Task<IActionResult> GetTableById<T>(string id) where T : Common.Databases.Models.Inheritor.Table
     {
         try
         {
-            var table = await _tableRepository.GetTableById(id);
+            var table = await _tableRepository.GetTableById<T>(id);
 
             return Ok(table);
         }

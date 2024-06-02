@@ -1,5 +1,4 @@
 ﻿using JokersJunction.PlayerProfile.Repositories.Interfaces;
-using JokersJunction.Server.Data;
 using JokersJunction.Shared;
 using JokersJunction.Shared.Data;
 using JokersJunction.Shared.Models;

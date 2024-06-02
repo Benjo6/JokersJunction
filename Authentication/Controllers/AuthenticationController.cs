@@ -25,11 +25,5 @@ public class AuthenticationController : GrpcControllerBase<Authorizer.Authorizer
         return Ok(response);
     }
 
-    //[HttpPost]
-    //[Route("disconnect")]
-    //public async Task<IActionResult> Disconnect(DisconnectRequest request)
-    //{
-    //    var response = await Service.DisconnectAsync(new() { Username = request.Username });
-    //    return Ok(response);
-    //}
+
 }

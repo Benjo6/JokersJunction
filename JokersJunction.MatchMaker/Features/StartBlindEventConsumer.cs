@@ -4,7 +4,7 @@ using JokersJunction.Common.Events;
 using JokersJunction.Common.Events.Responses;
 using MassTransit;
 
-namespace JokersJunction.MatchMaker.Features;
+namespace JokersJunction.GameUser.Features;
 
 public class StartBlindEventConsumer : IConsumer<StartBlindEvent>
 {

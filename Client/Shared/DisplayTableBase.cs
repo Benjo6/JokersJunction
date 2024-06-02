@@ -5,44 +5,50 @@ using JokersJunction.Client.Components;
 using JokersJunction.Client.Services;
 using JokersJunction.Shared;
 using Microsoft.AspNetCore.Components;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
-namespace JokersJunction.Client.Shared
+namespace JokersJunction.Client.Shared;
+
+public class DisplayTableBase<T> : ComponentBase where T : UiTable
 {
-    public class DisplayTableBase : ComponentBase
+    [Parameter]
+    public EventCallback<string> OnChange { get; set; }
+
+    [Parameter]
+    public T CurrentTable { get; set; }
+
+    [Inject] public ITableService TableService { get; set; }
+
+    [Inject] public ILocalStorageService LocalStorageService { get; set; }
+
+    [Inject] public NavigationManager NavigationManager { get; set; }
+
+    [Inject] public IModalService ModalService { get; set; }
+
+    protected async Task DeleteConfirm()
     {
-        [Parameter]
-        public EventCallback<string> OnChange { get; set; }
+        var parameters = new ModalParameters();
+        parameters.Add(nameof(CurrentTable), CurrentTable);
 
-        [Parameter]
-        public PokerTable Table { get; set; }
+        var resultModal = ModalService.Show<TableDeletionConfirm>("Confirm", parameters);
+        var result = await resultModal.Result;
 
-        [Inject] public ITableService TableService { get; set; }
-
-        [Inject] public ILocalStorageService LocalStorageService { get; set; }
-
-        [Inject] public NavigationManager NavigationManager { get; set; }
-
-        [Inject] public IModalService ModalService { get; set; }
-
-        protected async Task DeleteConfirm()
+        if (!result.Cancelled)
         {
-            var parameters = new ModalParameters();
-            parameters.Add(nameof(Table), Table);
-
-            var resultModal = ModalService.Show<TableDeletionConfirm>("Confirm", parameters);
-            var result = await resultModal.Result;
-
-            if (!result.Cancelled)
-            {
-                await OnChange.InvokeAsync("List was changed");
-            }
+            await OnChange.InvokeAsync("List was changed");
         }
+    }
 
-        protected async Task JoinTable()
+    protected async Task JoinTable()
+    {
+        await LocalStorageService.SetItemAsync("currentTable", CurrentTable.Id);
+        if (typeof(T) == typeof(BlackjackTable))
         {
-            await LocalStorageService.SetItemAsync("currentTable", Table.Id);
-
-            NavigationManager.NavigateTo("/Game");
+            NavigationManager.NavigateTo("/Blackjack-Game");
+        }
+        if (typeof(T) == typeof(PokerTable))
+        {
+            NavigationManager.NavigateTo("/Poker-Game");
         }
     }
 }

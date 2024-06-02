@@ -1,22 +1,19 @@
-﻿namespace JokersJunction.Shared.Models
+﻿namespace JokersJunction.Shared.Models;
+
+public class PokerPlayerStateModel
 {
-    public class PlayerStateModel
-    {
-        public List<GamePlayer> Players { get; set; }
-        public List<Card>? CommunityCards { get; set; }
-        public List<Card>? HandCards { get; set; }
-        public List<Pot>? Pots { get; set; }
-        public bool GameInProgress { get; set; }
-        public int RaiseAmount { get; set; }
-        public int SmallBlind { get; set; }
-        public PlayerStateModel()
-        {
-            Players = new List<GamePlayer>();
-            CommunityCards = new List<Card>();
-            HandCards = new List<Card>();
-            Pots = new List<Pot>();
-            RaiseAmount = 0;
-            SmallBlind = 0;
-        }
-    }
+    public List<GamePlayer> Players { get; set; } = new();
+    public List<Card>? CommunityCards { get; set; } = new();
+    public List<Card>? HandCards { get; set; } = new();
+    public List<Pot>? Pots { get; set; } = new();
+    public bool GameInProgress { get; set; }
+    public int RaiseAmount { get; set; } = 0;
+    public int SmallBlind { get; set; } = 0;
+}
+
+public class BlackjackPlayerStateModel
+{
+    public List<GamePlayer> Players { get; set; } = new();
+    public List<Card> HandCards { get; set; } = new();
+    public bool GameInProgress { get; set; }
 }

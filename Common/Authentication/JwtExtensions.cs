@@ -4,6 +4,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 
+namespace JokersJunction.Common.Authentication;
+
 public static class JwtExtensions
 {
     public static void AddJwtAuthentication(this IServiceCollection services, IConfiguration configuration)

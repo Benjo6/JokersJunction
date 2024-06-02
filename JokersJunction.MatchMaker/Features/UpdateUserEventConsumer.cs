@@ -1,9 +1,8 @@
 ﻿using JokersJunction.Common.Databases.Interfaces;
 using JokersJunction.Common.Events;
 using MassTransit;
-using Microsoft.EntityFrameworkCore.Storage;
 
-namespace JokersJunction.MatchMaker.Features;
+namespace JokersJunction.GameUser.Features;
 
 public class UpdateUserEventConsumer : IConsumer<UpdateUserEvent>
 {

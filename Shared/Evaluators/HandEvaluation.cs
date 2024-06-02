@@ -1,6 +1,4 @@
-﻿using JokersJunction.Shared;
-
-namespace JokersJunction.Server.Evaluators
+﻿namespace JokersJunction.Shared.Evaluators
 {
     public static class HandEvaluation
     {

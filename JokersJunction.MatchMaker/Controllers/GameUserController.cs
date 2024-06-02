@@ -4,11 +4,12 @@ using JokersJunction.Common.Events;
 using JokersJunction.Common.Events.Responses;
 using JokersJunction.Server.Events;
 using JokersJunction.Server.Events.Response;
+using JokersJunction.Shared;
 using JokersJunction.Shared.Responses;
 using MassTransit;
 using Microsoft.AspNetCore.Mvc;
 
-namespace JokersJunction.MatchMaker.Controllers;
+namespace JokersJunction.GameUser.Controllers;
 
 [Route("api/game-user")]
 [ApiController]
@@ -16,23 +17,37 @@ public class GameUserController : ControllerBase
 {
     private readonly IPublishEndpoint _publishEndpoint;
     private readonly IDatabaseService _databaseService;
-    private readonly IRequestClient<CurrentTableEvent> _currentTableRequestClient;
-    private IRequestClient<DisconnectingUserFromGameEvent> _disconnectingUserFromGameRequestClient;
+    private readonly IRequestClient<CurrentPokerTableEvent> _currentPokerTableRequestClient;
+    private readonly IRequestClient<CurrentBlackjackTableEvent> _currentBlackjackTableRequestClient;
+    private readonly IRequestClient<DisconnectingUserFromGameEvent> _disconnectingUserFromGameRequestClient;
 
-    public GameUserController(IPublishEndpoint publishEndpoint, IDatabaseService databaseService, IRequestClient<CurrentTableEvent> currentTableRequestClient, IRequestClient<DisconnectingUserFromGameEvent> disconnectingUserFromGameRequestClient)
+    public GameUserController(IPublishEndpoint publishEndpoint, IDatabaseService databaseService,  IRequestClient<DisconnectingUserFromGameEvent> disconnectingUserFromGameRequestClient, IRequestClient<CurrentPokerTableEvent> currentPokerTableRequestClient, IRequestClient<CurrentBlackjackTableEvent> currentBlackjackTableRequestClient)
     {
         _publishEndpoint = publishEndpoint;
         _databaseService = databaseService;
-        _currentTableRequestClient = currentTableRequestClient;
         _disconnectingUserFromGameRequestClient = disconnectingUserFromGameRequestClient;
+        _currentPokerTableRequestClient = currentPokerTableRequestClient;
+        _currentBlackjackTableRequestClient = currentBlackjackTableRequestClient;
     }
     [HttpPost("add-users/{connectionId}")]
-    public async Task<IActionResult> AddToUsers(string connectionId, string username, string tableId)
+    public async Task<IActionResult> AddToUsers(string connectionId, string username, string tableId, TableType tableType)
     {
-        var response = await _currentTableRequestClient.GetResponse<CurrentTableEventResponse>(new CurrentTableEvent()
+        Response<CurrentBlackjackTableEventResponse> response;
+        if (tableType == TableType.Poker)
         {
-            TableId = tableId
-        });
+            response = await _currentPokerTableRequestClient.GetResponse<CurrentBlackjackTableEventResponse>(new CurrentPokerTableEvent()
+            {
+                TableId = tableId
+            });
+        }
+        else
+        {
+            response = await _currentBlackjackTableRequestClient.GetResponse<CurrentBlackjackTableEventResponse>(new CurrentBlackjackTableEvent()
+            {
+                TableId = tableId
+            });
+        }
+       
         var users = await _databaseService.ReadAsync<User>();
         if (users.Count(e => e.TableId == tableId) >= response.Message.Table.MaxPlayers)
         {
@@ -54,10 +69,20 @@ public class GameUserController : ControllerBase
             Balance = 0
         };
         _databaseService.InsertOne(newUser);
-        await _publishEndpoint.Publish(new PlayerStateRefreshEvent
+        if (tableType == TableType.Poker)
         {
-            TableId = tableId,
-        });
+            await _publishEndpoint.Publish(new PokerPlayerStateRefreshEvent
+            {
+                TableId = tableId,
+            });
+        }
+        else
+        {
+            await _publishEndpoint.Publish(new BlackjackPlayerStateRefreshEvent
+            {
+                TableId = tableId,
+            });
+        }
 
         return Ok(AddUsersResponse.Done);
     }
@@ -104,7 +129,7 @@ public class GameUserController : ControllerBase
             }
             else
             {
-                await _publishEndpoint.Publish(new PlayerStateRefreshEvent
+                await _publishEndpoint.Publish(new PokerPlayerStateRefreshEvent()
                 {
                     TableId = tableId,
                 });
@@ -118,7 +143,7 @@ public class GameUserController : ControllerBase
         return Ok();
     }
 
-    private int AssignTableToUser(string tableId, List<User> users)
+    private int AssignTableToUser(string tableId, IEnumerable<User> users)
     {
         var occupiedSeats = users.Where(e => e.TableId == tableId).Select(e => e.SeatNumber).OrderBy(e => e).ToList();
         for (var i = 0; i < occupiedSeats.Count; i++)

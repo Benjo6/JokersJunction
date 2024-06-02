@@ -1,12 +1,10 @@
 ﻿namespace JokersJunction.Shared;
 
-public class GameInformation
+public class PokerGameInformation : GameInformation
 {
     public List<GamePlayer> Players { get; set; }
     public List<Card> TableCards { get; set; }
-    public List<Card> Hand { get; set; }
     public List<Pot> Pots { get; set; }
-    public List<PlayerNote> PlayersNotes { get; set; } = new();
     public bool GameInProgress { get; set; }
     public string CurrentPlayer { get; set; }
     public int SmallBlindIndex { get; set; }
@@ -14,7 +12,7 @@ public class GameInformation
     public string Winner { get; set; }
     public int RaiseAmount { get; set; }
     public int PlayerRaise { get; set; }
-    public GameInformation()
+    public PokerGameInformation()
     {
         TableCards = new List<Card>();
         Hand = new List<Card>();
@@ -24,4 +22,19 @@ public class GameInformation
         PlayerRaise = 0;
     }
 
+}
+public class BlackjackGameInformation : GameInformation
+{
+    public List<GamePlayer> Players { get; set; } = new();
+    public List<Card> DealerHand { get; set; } = new();
+    public bool GameInProgress { get; set; }
+    public string CurrentPlayer { get; set; }
+    public int PlayerBet { get; set; }
+    public string Winner { get; set; }
+}
+
+public class GameInformation
+{
+    public List<Card> Hand { get; set; } = new();
+    public List<PlayerNote> PlayersNotes { get; set; } = new();
 }

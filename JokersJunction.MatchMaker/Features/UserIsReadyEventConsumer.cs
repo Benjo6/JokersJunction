@@ -1,10 +1,10 @@
 ﻿using JokersJunction.Common.Databases.Interfaces;
 using JokersJunction.Common.Databases.Models;
-using JokersJunction.Common.Events.Responses;
 using JokersJunction.Common.Events;
+using JokersJunction.Common.Events.Responses;
 using MassTransit;
 
-namespace JokersJunction.MatchMaker.Features;
+namespace JokersJunction.GameUser.Features;
 
 public class UserIsReadyEventConsumer : IConsumer<UserIsReadyEvent>
 {

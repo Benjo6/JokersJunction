@@ -3,7 +3,6 @@ using JokersJunction.Common.Databases.Models;
 using JokersJunction.Common.Events;
 using JokersJunction.Common.Events.Responses;
 using JokersJunction.GameManagement.Services.Contracts;
-using JokersJunction.Server.Evaluators;
 using JokersJunction.Server.Events;
 using JokersJunction.Server.Events.Response;
 using JokersJunction.Server.Hubs;
@@ -11,9 +10,9 @@ using JokersJunction.Server.Responses;
 using JokersJunction.Shared;
 using JokersJunction.Shared.Models;
 using MassTransit;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using System.Collections;
+using JokersJunction.Shared.Evaluators;
 
 namespace JokersJunction.GameManagement.Services;
 
@@ -22,26 +21,31 @@ public class GameService : IGameService
     private readonly IHubContext<GameHub> _hubContext;
     private readonly IPublishEndpoint _publishEndpoint;
     private readonly IDatabaseService _databaseService;
-    private readonly IRequestClient<CurrentTableEvent> _currentTableRequestClient;
+    private readonly IRequestClient<CurrentPokerTableEvent> _currentPokerTableRequestClient;
+    private readonly IRequestClient<CurrentBlackjackTableEvent> _currentBlackjackTableRequestClient;
     private readonly IRequestClient<StartBlindEvent> _startBlindRequestClient;
     private readonly IRequestClient<GetUsersEvent> _getUsersRequestClient;
     private readonly IRequestClient<GetUserByNameEvent> _getUserByNameRequestClient;
-    public GameService(IHubContext<GameHub> hubContext, IPublishEndpoint publishEndpoint, IDatabaseService databaseService, IRequestClient<CurrentTableEvent> currentTableRequestClient, IRequestClient<StartBlindEvent> startBlindRequestClient, IRequestClient<GetUsersEvent> getUsersRequestClient)
+    public GameService(IHubContext<GameHub> hubContext, IPublishEndpoint publishEndpoint, IDatabaseService databaseService, IRequestClient<StartBlindEvent> startBlindRequestClient, IRequestClient<GetUsersEvent> getUsersRequestClient, IRequestClient<CurrentPokerTableEvent> currentPokerTableRequestClient, IRequestClient<CurrentBlackjackTableEvent> currentBlackjackTableRequestClient, IRequestClient<GetUserByNameEvent> getUserByNameRequestClient)
     {
         _hubContext = hubContext;
         _publishEndpoint = publishEndpoint;
         _databaseService = databaseService;
-        _currentTableRequestClient = currentTableRequestClient;
         _startBlindRequestClient = startBlindRequestClient;
         _getUsersRequestClient = getUsersRequestClient;
+        _currentPokerTableRequestClient = currentPokerTableRequestClient;
+        _currentBlackjackTableRequestClient = currentBlackjackTableRequestClient;
+        _getUserByNameRequestClient = getUserByNameRequestClient;
     }
 
-    public async Task PlayerStateRefresh(string tableId, List<Game>? games)
+    public async Task BlackjackPlayerStateRefresh(string tableId)
     {
-        var playerState = new PlayerStateModel();
+        var playerState = new BlackjackPlayerStateModel();
+        var blackjackGames = await _databaseService.ReadAsync<BlackjackGame>();
         var responseUsers = await _getUsersRequestClient.GetResponse<GetUsersEventResponse>(new GetUsersEvent());
         var users = responseUsers.Message.Users;
-        foreach (var user in users.Where(x=>x.TableId == tableId))
+        // Collect user states
+        foreach (var user in users.Where(e => e.TableId == tableId))
         {
             playerState.Players.Add(new GamePlayer
             {
@@ -52,7 +56,57 @@ public class GameService : IGameService
                 GameMoney = user.Balance
             });
 
-            if (games.FirstOrDefault(e=>e.TableId==tableId) != null &&
+            // Determine current game (Blackjack)
+            var blackjackGame = blackjackGames.FirstOrDefault(e => e.TableId == tableId);
+
+            if (blackjackGame != null && blackjackGame.Players.Select(e => e.Name).Contains(user.Name))
+            {
+                playerState.Players.Last().ActionState = PlayerActionState.Playing;
+            }
+        }
+
+        // Set blackjack game states
+        var activeBlackjackGame = blackjackGames.FirstOrDefault(e => e.TableId == tableId);
+
+        if (activeBlackjackGame != null)
+        {
+            playerState.GameInProgress = true; // assuming game is in progress if it's listed
+        }
+
+        var blackjackGamePlayers = activeBlackjackGame?.Players;
+
+        // Send state refresh to all users based on the active blackjack game
+        if (blackjackGamePlayers == null)
+        {
+            await _hubContext.Clients.Group(tableId).SendAsync("ReceiveBlackjackStateRefresh", playerState);
+        }
+        else
+        {
+            foreach (var user in users.Where(e => e.TableId == tableId))
+            {
+                playerState.HandCards = blackjackGamePlayers.FirstOrDefault(e => e.Name == user.Name)?.HandCards;
+                await _hubContext.Clients.Client(user.ConnectionId).SendAsync("ReceiveBlackjackStateRefresh", playerState);
+            }
+        }
+    }
+
+    public async Task PokerPlayerStateRefresh(string tableId, List<PokerGame>? games)
+    {
+        var playerState = new PokerPlayerStateModel();
+        var responseUsers = await _getUsersRequestClient.GetResponse<GetUsersEventResponse>(new GetUsersEvent());
+        var users = responseUsers.Message.Users;
+        foreach (var user in users.Where(x => x.TableId == tableId))
+        {
+            playerState.Players.Add(new GamePlayer
+            {
+                Username = user.Name,
+                IsPlaying = user.InGame,
+                IsReady = user.IsReady,
+                SeatNumber = user.SeatNumber,
+                GameMoney = user.Balance
+            });
+
+            if (games.FirstOrDefault(e => e.TableId == tableId) != null &&
                 games.First(e => e.TableId == tableId).Players.Select(e => e.Name).Contains(user.Name))
             {
                 playerState.Players.Last().ActionState = games.First(e => e.TableId == tableId).Players
@@ -69,7 +123,7 @@ public class GameService : IGameService
         if (games.FirstOrDefault(e => e.TableId == tableId)?.RaiseAmount > 0)
             playerState.RaiseAmount = games.First(e => e.TableId == tableId).RaiseAmount;
 
-        var playerStateResponse = new PlayerStateResponse()
+        var playerStateResponse = new PokerPlayerStateResponse()
         {
             GamePlayers = games.FirstOrDefault(e => e.TableId == tableId)?.Players,
             PlayerStateModel = playerState,
@@ -82,18 +136,18 @@ public class GameService : IGameService
     public async Task StartGame(string tableId, int smallBlindPosition, List<User> users)
     {
         // Initialize Game
-        var responseTable = await _currentTableRequestClient.GetResponse<CurrentTableEventResponse>(new CurrentTableEvent()
+        var responseTable = await _currentPokerTableRequestClient.GetResponse<CurrentPokerTableEventResponse>(new CurrentPokerTableEvent()
         {
             TableId = tableId
         });
         var currentTableInfo = responseTable.Message.Table;
 
-        var newGame = new Game(tableId, smallBlindPosition, currentTableInfo.SmallBlind);
+        var newGame = new PokerGame(tableId, smallBlindPosition, currentTableInfo.SmallBlind);
 
         // Adding players to table
-        foreach (var user in users.Where(u=> u.IsReady && u.TableId == tableId))
+        foreach (var user in users.Where(u => u.IsReady && u.TableId == tableId))
         {
-            newGame.Players.Add(new Player{Name = user.Name, RoundBet = 0});
+            newGame.Players.Add(new PokerPlayer() { Name = user.Name, RoundBet = 0 });
             await _publishEndpoint.Publish(new UserInGameEvent
             {
                 User = user
@@ -133,20 +187,20 @@ public class GameService : IGameService
 
         _databaseService.InsertOne(newGame);
 
-        var games = await _databaseService.ReadAsync<Game>();
+        var games = await _databaseService.ReadAsync<PokerGame>();
 
         //Notify about the end of preparations
-        await PlayerStateRefresh(tableId, games);
+        await PokerPlayerStateRefresh(tableId, games);
 
         await _hubContext.Clients.Group(tableId)
             .SendAsync("ReceiveTurnPlayer", newGame.GetPlayerNameByIndex(newGame.Index));
     }
 
-    public async Task MoveIndex(string tableId, Game currentGame)
+    public async Task MoveIndex(string tableId, PokerGame currentGame)
     {
         do
         {
-            currentGame.SetIndex(currentGame.Index+1);
+            currentGame.SetIndex(currentGame.Index + 1);
             await _databaseService.ReplaceOneAsync(currentGame);
             if (currentGame.Index == currentGame.RoundEndIndex)
             {
@@ -168,7 +222,7 @@ public class GameService : IGameService
 
         var responseUser = await _getUsersRequestClient.GetResponse<GetUsersEventResponse>(new GetUsersEvent());
         var users = responseUser.Message.Users;
-        var games = await _databaseService.ReadAsync<Game>();
+        var games = await _databaseService.ReadAsync<PokerGame>();
 
         if (currentGame.CommunityCardsActions == CommunityCardsActions.AfterRiver)
         {
@@ -176,7 +230,7 @@ public class GameService : IGameService
 
             await _databaseService.DeleteOneAsync(currentGame);
 
-            games = await _databaseService.ReadAsync<Game>();
+            games = await _databaseService.ReadAsync<PokerGame>();
             if (users.Where(e => e.TableId == tableId).Count(e => e.IsReady) >= 2 && games.All(e => e.TableId != tableId))
             {
                 await StartGame(tableId, currentGame.SmallBlindIndex + 1, users);
@@ -188,24 +242,24 @@ public class GameService : IGameService
                     e.InGame = false;
                     await _databaseService.ReplaceOneAsync(e);
                 }
-                await PlayerStateRefresh(tableId, games);
+                await PokerPlayerStateRefresh(tableId, games);
             }
         }
         else
         {
-            await PlayerStateRefresh(tableId, games);
+            await PokerPlayerStateRefresh(tableId, games);
             await _hubContext.Clients.Group(tableId)
                 .SendAsync("ReceiveTurnPlayer",
                     currentGame.GetPlayerNameByIndex(currentGame.Index));
         }
     }
 
-    public async Task CommunityCardsController(Game currentGame)
+    public async Task CommunityCardsController(PokerGame currentGame)
     {
         var responseUser = await _getUsersRequestClient.GetResponse<GetUsersEventResponse>(new GetUsersEvent());
         var users = responseUser.Message.Users;
-        var games = await _databaseService.ReadAsync<Game>();
-        
+        var games = await _databaseService.ReadAsync<PokerGame>();
+
         switch (currentGame.CommunityCardsActions)
         {
             case CommunityCardsActions.PreFlop:
@@ -237,14 +291,14 @@ public class GameService : IGameService
 
             case CommunityCardsActions.River:
                 await GetAndAwardWinners(currentGame);
-                await PlayerStateRefresh(currentGame.TableId, games);
+                await PokerPlayerStateRefresh(currentGame.TableId, games);
                 currentGame.CommunityCardsActions++;
                 await _databaseService.ReplaceOneAsync(currentGame);
                 break;
         }
     }
 
-    public async Task GetAndAwardWinners(Game currentGame)
+    public async Task GetAndAwardWinners(PokerGame currentGame)
     {
         var communityCards = currentGame.TableCards;
         var evaluatedPlayers = new Hashtable();
@@ -279,7 +333,49 @@ public class GameService : IGameService
         }
     }
 
-    public async Task UpdatePot(Game currentGame)
+    public async Task CompleteBlackjackGame(string tableId)
+    {
+        var games = await _databaseService.ReadAsync<BlackjackGame>();
+        var game = games.FirstOrDefault(g => g.TableId == tableId);
+
+        if (game != null)
+        {
+            while (game.GetDealerHandValue() < 17)
+            {
+                game.DealerHand.Add(game.Deck.DrawCards(1).First());
+            }
+
+            var responseUser = await _getUsersRequestClient.GetResponse<GetUsersEventResponse>(new GetUsersEvent());
+            var users = responseUser.Message.Users;
+            foreach (var player in game.Players)
+            {
+                if (player.IsBust ||
+                    (game.GetDealerHandValue() <= 21 && game.GetDealerHandValue() > player.GetHandValue()))
+                {
+                    await _hubContext.Clients.Client(users.First(u => u.Name == player.Name).ConnectionId)
+                        .SendAsync("ReceiveBlackjackLose", game.DealerHand);
+                }
+                else if (game.GetDealerHandValue() > 21 || player.GetHandValue() > game.GetDealerHandValue())
+                {
+                    var winAmount = player.RoundBet * 2;
+                    users.First(u => u.Name == player.Name).Balance += winAmount;
+                    await _hubContext.Clients.Client(users.First(u => u.Name == player.Name).ConnectionId)
+                        .SendAsync("ReceiveBlackjackWin", game.DealerHand);
+                }
+                else
+                {
+                    var pushAmount = player.RoundBet;
+                    users.First(u => u.Name == player.Name).Balance += pushAmount;
+                    await _hubContext.Clients.Client(users.First(u => u.Name == player.Name).ConnectionId)
+                        .SendAsync("ReceiveBlackjackDraw", game.DealerHand);
+                }
+            }
+
+            await _databaseService.DeleteOneAsync(game);
+        }
+    }
+
+    public async Task UpdatePot(PokerGame currentGame)
     {
         var players = currentGame.Players.Where(player => player.RoundBet > 0 && player.ActionState == PlayerActionState.Playing).ToList();
 

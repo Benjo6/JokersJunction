@@ -2,6 +2,7 @@
 using JokersJunction.Shared.Models;
 using System.Net.Http.Json;
 using Newtonsoft.Json;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace JokersJunction.Client.Services
 {
@@ -28,37 +29,16 @@ namespace JokersJunction.Client.Services
                 return null;
             }
         }
-        public async Task<List<PokerTable>> GetList()
+        public async Task<List<T>> GetList<T>() where T : UiTable
         {
-            try
-            {
-                var responseContent = await GetResponseContentAsync("gateway/table");
-                if (string.IsNullOrEmpty(responseContent))
-                {
-                    throw new Exception("Received empty response content.");
-                }
-
-                var tables = JsonConvert.DeserializeObject<List<PokerTable>>(responseContent); 
-                return tables ?? throw new Exception("Failed to deserialize the response content.");
-            }
-            catch (HttpRequestException e)
-            {
-                // Handle HTTP request-specific exceptions e.g., connectivity issues, timeouts.
-                Console.WriteLine($"HTTP Request failed: {e.Message}");
-                throw;
-            }
-            catch (Exception e)
-            {
-                // Handle non-HTTP exceptions.
-                Console.WriteLine($"An error occurred: {e.Message}");
-                throw;
-            }
+            var result = await _httpClient.GetFromJsonAsync<List<T>>("api/table");
+            return result;
         }
 
 
-        public async Task<PokerTable> GetById(string id)
+        public async Task<T> GetById<T>(int id) where T : UiTable
         {
-            var result = await _httpClient.GetFromJsonAsync<PokerTable>($"gateway/table/{id}");
+            var result = await _httpClient.GetFromJsonAsync<T>($"api/table/{id}");
             return result;
         }
 
