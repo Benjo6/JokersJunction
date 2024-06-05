@@ -10,7 +10,24 @@
           "Host": "localhost",
           "Port": 7123
         }
-      ]
+      ],
+      "FileCacheOptions": {
+        "TtlSeconds": 30
+      },
+      "RateLimitOptions": {
+        "ClientWhitelist": [],
+        "EnableRateLimiting": true,
+        "Period": "1s",
+        "PeriodTimespan": 1,
+        "Limit": 5
+      },
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      },
+      "RouteClaimsRequirement": {
+        "role": "User"
+      }
     },
     {
       "UpstreamPathTemplate": "/gateway/game/mark-ready/{username}",
@@ -22,7 +39,24 @@
           "Host": "localhost",
           "Port": 7123
         }
-      ]
+      ],
+      "FileCacheOptions": {
+        "TtlSeconds": 30
+      },
+      "RateLimitOptions": {
+        "ClientWhitelist": [],
+        "EnableRateLimiting": true,
+        "Period": "1s",
+        "PeriodTimespan": 1,
+        "Limit": 5
+      },
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      },
+      "RouteClaimsRequirement": {
+        "role": "User"
+      }
     },
     {
       "UpstreamPathTemplate": "/gateway/game-user/add-users/{connectionId}",
@@ -34,7 +68,24 @@
           "Host": "localhost",
           "Port": 7265
         }
-      ]
+      ],
+      "FileCacheOptions": {
+        "TtlSeconds": 30
+      },
+      "RateLimitOptions": {
+        "ClientWhitelist": [],
+        "EnableRateLimiting": true,
+        "Period": "1s",
+        "PeriodTimespan": 1,
+        "Limit": 5
+      },
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      },
+      "RouteClaimsRequirement": {
+        "role": "User"
+      }
     },
     {
       "UpstreamPathTemplate": "/gateway/game-user/disconnect-user/{username}",
@@ -46,7 +97,24 @@
           "Host": "localhost",
           "Port": 7265
         }
-      ]
+      ],
+      "FileCacheOptions": {
+        "TtlSeconds": 30
+      },
+      "RateLimitOptions": {
+        "ClientWhitelist": [],
+        "EnableRateLimiting": true,
+        "Period": "1s",
+        "PeriodTimespan": 1,
+        "Limit": 5
+      },
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      },
+      "RouteClaimsRequirement": {
+        "role": "User"
+      }
     },
     {
       "UpstreamPathTemplate": "/gateway/player-note/{userId}",
@@ -58,7 +126,24 @@
           "Host": "localhost",
           "Port": 5002
         }
-      ]
+      ],
+      "FileCacheOptions": {
+        "TtlSeconds": 30
+      },
+      "RateLimitOptions": {
+        "ClientWhitelist": [],
+        "EnableRateLimiting": true,
+        "Period": "1s",
+        "PeriodTimespan": 1,
+        "Limit": 5
+      },
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      },
+      "RouteClaimsRequirement": {
+        "role": "User"
+      }
     },
     {
       "UpstreamPathTemplate": "/gateway/player-note/by-name/{userId}/{notePlayerName}",
@@ -70,7 +155,24 @@
           "Host": "localhost",
           "Port": 5002
         }
-      ]
+      ],
+      "FileCacheOptions": {
+        "TtlSeconds": 30
+      },
+      "RateLimitOptions": {
+        "ClientWhitelist": [],
+        "EnableRateLimiting": true,
+        "Period": "1s",
+        "PeriodTimespan": 1,
+        "Limit": 5
+      },
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      },
+      "RouteClaimsRequirement": {
+        "role": "User"
+      }
     },
     {
       "UpstreamPathTemplate": "/gateway/player-note/{userId}/{notedPlayerName}",
@@ -82,7 +184,24 @@
           "Host": "localhost",
           "Port": 5002
         }
-      ]
+      ],
+      "FileCacheOptions": {
+        "TtlSeconds": 30
+      },
+      "RateLimitOptions": {
+        "ClientWhitelist": [],
+        "EnableRateLimiting": true,
+        "Period": "1s",
+        "PeriodTimespan": 1,
+        "Limit": 5
+      },
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      },
+      "RouteClaimsRequirement": {
+        "role": "User"
+      }
     },
     {
       "UpstreamPathTemplate": "/gateway/player-note",
@@ -94,7 +213,24 @@
           "Host": "localhost",
           "Port": 5002
         }
-      ]
+      ],
+      "FileCacheOptions": {
+        "TtlSeconds": 30
+      },
+      "RateLimitOptions": {
+        "ClientWhitelist": [],
+        "EnableRateLimiting": true,
+        "Period": "1s",
+        "PeriodTimespan": 1,
+        "Limit": 5
+      },
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      },
+      "RouteClaimsRequirement": {
+        "role": "User"
+      }
     },
     {
       "UpstreamPathTemplate": "/gateway/table/delete/{tableId}",
@@ -106,7 +242,24 @@
           "Host": "localhost",
           "Port": 5001
         }
-      ]
+      ],
+      "FileCacheOptions": {
+        "TtlSeconds": 30
+      },
+      "RateLimitOptions": {
+        "ClientWhitelist": [],
+        "EnableRateLimiting": true,
+        "Period": "1s",
+        "PeriodTimespan": 1,
+        "Limit": 5
+      },
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      },
+      "RouteClaimsRequirement": {
+        "role": "Admin"
+      }
     },
     {
       "UpstreamPathTemplate": "/gateway/table/create",
@@ -118,7 +271,24 @@
           "Host": "localhost",
           "Port": 5001
         }
-      ]
+      ],
+      "FileCacheOptions": {
+        "TtlSeconds": 30
+      },
+      "RateLimitOptions": {
+        "ClientWhitelist": [],
+        "EnableRateLimiting": true,
+        "Period": "1s",
+        "PeriodTimespan": 1,
+        "Limit": 5
+      },
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      },
+      "RouteClaimsRequirement": {
+        "role": "Admin"
+      }
     },
     {
       "UpstreamPathTemplate": "/gateway/table/{id}",
@@ -130,7 +300,24 @@
           "Host": "localhost",
           "Port": 5001
         }
-      ]
+      ],
+      "FileCacheOptions": {
+        "TtlSeconds": 30
+      },
+      "RateLimitOptions": {
+        "ClientWhitelist": [],
+        "EnableRateLimiting": true,
+        "Period": "1s",
+        "PeriodTimespan": 1,
+        "Limit": 5
+      },
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      },
+      "RouteClaimsRequirement": {
+        "role": "User"
+      }
     },
     {
       "UpstreamPathTemplate": "/gateway/table",
@@ -142,7 +329,24 @@
           "Host": "localhost",
           "Port": 5001
         }
-      ]
+      ],
+      "FileCacheOptions": {
+        "TtlSeconds": 30
+      },
+      "RateLimitOptions": {
+        "ClientWhitelist": [],
+        "EnableRateLimiting": true,
+        "Period": "1s",
+        "PeriodTimespan": 1,
+        "Limit": 5
+      },
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      },
+      "RouteClaimsRequirement": {
+        "role": "User"
+      }
     },
     {
       "UpstreamPathTemplate": "/gateway/currency/balance/{userName}",
@@ -154,7 +358,24 @@
           "Host": "localhost",
           "Port": 7158
         }
-      ]
+      ],
+      "FileCacheOptions": {
+        "TtlSeconds": 30
+      },
+      "RateLimitOptions": {
+        "ClientWhitelist": [],
+        "EnableRateLimiting": true,
+        "Period": "1s",
+        "PeriodTimespan": 1,
+        "Limit": 5
+      },
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      },
+      "RouteClaimsRequirement": {
+        "role": "User"
+      }
     },
     {
       "UpstreamPathTemplate": "/gateway/currency/remove",
@@ -166,7 +387,24 @@
           "Host": "localhost",
           "Port": 7158
         }
-      ]
+      ],
+      "FileCacheOptions": {
+        "TtlSeconds": 30
+      },
+      "RateLimitOptions": {
+        "ClientWhitelist": [],
+        "EnableRateLimiting": true,
+        "Period": "1s",
+        "PeriodTimespan": 1,
+        "Limit": 5
+      },
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      },
+      "RouteClaimsRequirement": {
+        "role": "Admin"
+      }
     },
     {
       "UpstreamPathTemplate": "/gateway/currency/add",
@@ -178,7 +416,24 @@
           "Host": "localhost",
           "Port": 7158
         }
-      ]
+      ],
+      "FileCacheOptions": {
+        "TtlSeconds": 30
+      },
+      "RateLimitOptions": {
+        "ClientWhitelist": [],
+        "EnableRateLimiting": true,
+        "Period": "1s",
+        "PeriodTimespan": 1,
+        "Limit": 5
+      },
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      },
+      "RouteClaimsRequirement": {
+        "role": "Admin"
+      }
     },
     {
       "UpstreamPathTemplate": "/gateway/auth/register",
@@ -190,7 +445,24 @@
           "Host": "localhost",
           "Port": 7017
         }
-      ]
+      ],
+      "FileCacheOptions": {
+        "TtlSeconds": 30
+      },
+      "RateLimitOptions": {
+        "ClientWhitelist": [],
+        "EnableRateLimiting": true,
+        "Period": "1s",
+        "PeriodTimespan": 1,
+        "Limit": 5
+      },
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      },
+      "RouteClaimsRequirement": {
+        "role": "Guest"
+      }
     },
     {
       "UpstreamPathTemplate": "/gateway/auth/login",
@@ -202,7 +474,24 @@
           "Host": "localhost",
           "Port": 7017
         }
-      ]
+      ],
+      "FileCacheOptions": {
+        "TtlSeconds": 30
+      },
+      "RateLimitOptions": {
+        "ClientWhitelist": [],
+        "EnableRateLimiting": true,
+        "Period": "1s",
+        "PeriodTimespan": 1,
+        "Limit": 5
+      },
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      },
+      "RouteClaimsRequirement": {
+        "role": "User"
+      }
     },
     {
       "UpstreamPathTemplate": "/gateway/game/action-fold/{username}",
@@ -214,7 +503,24 @@
           "Host": "localhost",
           "Port": 7265
         }
-      ]
+      ],
+      "FileCacheOptions": {
+        "TtlSeconds": 30
+      },
+      "RateLimitOptions": {
+        "ClientWhitelist": [],
+        "EnableRateLimiting": true,
+        "Period": "1s",
+        "PeriodTimespan": 1,
+        "Limit": 5
+      },
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      },
+      "RouteClaimsRequirement": {
+        "role": "User"
+      }
     },
     {
       "UpstreamPathTemplate": "/gateway/game/action-check/{username}",
@@ -226,7 +532,24 @@
           "Host": "localhost",
           "Port": 7265
         }
-      ]
+      ],
+      "FileCacheOptions": {
+        "TtlSeconds": 30
+      },
+      "RateLimitOptions": {
+        "ClientWhitelist": [],
+        "EnableRateLimiting": true,
+        "Period": "1s",
+        "PeriodTimespan": 1,
+        "Limit": 5
+      },
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      },
+      "RouteClaimsRequirement": {
+        "role": "User"
+      }
     },
     {
       "UpstreamPathTemplate": "/gateway/game/action-raise/{username}",
@@ -238,7 +561,24 @@
           "Host": "localhost",
           "Port": 7265
         }
-      ]
+      ],
+      "FileCacheOptions": {
+        "TtlSeconds": 30
+      },
+      "RateLimitOptions": {
+        "ClientWhitelist": [],
+        "EnableRateLimiting": true,
+        "Period": "1s",
+        "PeriodTimespan": 1,
+        "Limit": 5
+      },
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      },
+      "RouteClaimsRequirement": {
+        "role": "User"
+      }
     },
     {
       "UpstreamPathTemplate": "/gateway/game/action-call/{username}",
@@ -250,7 +590,24 @@
           "Host": "localhost",
           "Port": 7265
         }
-      ]
+      ],
+      "FileCacheOptions": {
+        "TtlSeconds": 30
+      },
+      "RateLimitOptions": {
+        "ClientWhitelist": [],
+        "EnableRateLimiting": true,
+        "Period": "1s",
+        "PeriodTimespan": 1,
+        "Limit": 5
+      },
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      },
+      "RouteClaimsRequirement": {
+        "role": "User"
+      }
     },
     {
       "UpstreamPathTemplate": "/gateway/game/action-all-in/{username}",
@@ -262,7 +619,24 @@
           "Host": "localhost",
           "Port": 7265
         }
-      ]
+      ],
+      "FileCacheOptions": {
+        "TtlSeconds": 30
+      },
+      "RateLimitOptions": {
+        "ClientWhitelist": [],
+        "EnableRateLimiting": true,
+        "Period": "1s",
+        "PeriodTimespan": 1,
+        "Limit": 5
+      },
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      },
+      "RouteClaimsRequirement": {
+        "role": "User"
+      }
     },
     {
       "UpstreamPathTemplate": "/gateway/game/start-blackjack-game/{tableId}",
@@ -274,7 +648,24 @@
           "Host": "localhost",
           "Port": 7265
         }
-      ]
+      ],
+      "FileCacheOptions": {
+        "TtlSeconds": 30
+      },
+      "RateLimitOptions": {
+        "ClientWhitelist": [],
+        "EnableRateLimiting": true,
+        "Period": "1s",
+        "PeriodTimespan": 1,
+        "Limit": 5
+      },
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      },
+      "RouteClaimsRequirement": {
+        "role": "User"
+      }
     },
     {
       "UpstreamPathTemplate": "/gateway/game/blackjack-game-hit/{playerName}",
@@ -286,7 +677,24 @@
           "Host": "localhost",
           "Port": 7265
         }
-      ]
+      ],
+      "FileCacheOptions": {
+        "TtlSeconds": 30
+      },
+      "RateLimitOptions": {
+        "ClientWhitelist": [],
+        "EnableRateLimiting": true,
+        "Period": "1s",
+        "PeriodTimespan": 1,
+        "Limit": 5
+      },
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      },
+      "RouteClaimsRequirement": {
+        "role": "User"
+      }
     },
     {
       "UpstreamPathTemplate": "/gateway/game/blackjack-game-stand/{playerName}",
@@ -298,7 +706,24 @@
           "Host": "localhost",
           "Port": 7265
         }
-      ]
+      ],
+      "FileCacheOptions": {
+        "TtlSeconds": 30
+      },
+      "RateLimitOptions": {
+        "ClientWhitelist": [],
+        "EnableRateLimiting": true,
+        "Period": "1s",
+        "PeriodTimespan": 1,
+        "Limit": 5
+      },
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      },
+      "RouteClaimsRequirement": {
+        "role": "User"
+      }
     },
     {
       "UpstreamPathTemplate": "/gateway/game/blackjack-bet/{playerName}",
@@ -310,7 +735,34 @@
           "Host": "localhost",
           "Port": 7265
         }
-      ]
+      ],
+      "FileCacheOptions": {
+        "TtlSeconds": 30
+      },
+      "RateLimitOptions": {
+        "ClientWhitelist": [],
+        "EnableRateLimiting": true,
+        "Period": "1s",
+        "PeriodTimespan": 1,
+        "Limit": 5
+      },
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      },
+      "RouteClaimsRequirement": {
+        "role": "User"
+      }
     }
-  ]
+  ],
+  "GlobalConfiguration": {
+    "RateLimitOptions": {
+      "ClientIdHeader": "ClientId",
+      "QuotaExceededMessage": "Rate limit exceeded, try again in {0} seconds.",
+      "HttpStatusCode": 429,
+      "ClientWhitelist": [],
+      "RateLimitCounterPrefix": "ocelot_ratelimit"
+    },
+    "BaseUrl": "https://localhost:5000"
+  }
 }
