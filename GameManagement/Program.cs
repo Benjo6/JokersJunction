@@ -1,3 +1,5 @@
+using JokersJunction.Common.Databases.Interfaces;
+using JokersJunction.Common.Databases;
 using JokersJunction.GameManagement.Features;
 using MassTransit;
 
@@ -6,6 +8,8 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 builder.Services.AddControllers();
+
+builder.Services.AddScoped<IDatabaseService>(sp => new DatabaseService(builder.Configuration.GetConnectionString("MongoConnection")));
 
 
 builder.Services.AddMassTransit(busConfigurator =>
