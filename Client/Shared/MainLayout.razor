@@ -1,7 +1,13 @@
 ﻿@using Blazored.Modal
 @inherits LayoutComponentBase
 
+<BlazoredModal />
+<div class="sidebar">
+    <NavMenu OnChange="StateHasChanged" />
+</div>
 
-   <BlazoredModal />
-   @Body
-   <NavMenu />
+<div class="main">
+    <div class="content px-4 container">
+        @Body
+    </div>
+</div>

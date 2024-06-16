@@ -188,12 +188,5 @@ namespace JokersJunction.Client.Pages.Game_Sessions
             }
 
         }
-        protected async Task SendOnEnter(KeyboardEventArgs e)
-        {
-            if (e.Key == "Enter")
-            {
-                await SendMessage();
-            }
-        }
     }
 }
