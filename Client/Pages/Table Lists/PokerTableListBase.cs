@@ -39,7 +39,7 @@ public class PokerTableListBase : ComponentBase
     {
         ShowError = false;
 
-        var result = await TableService.GetList<PokerTable>();
+        var result = await TableService.GetPokerList();
 
         if (result.Successful)
         {

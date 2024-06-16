@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace JokersJunction.Server.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/")]
     [ApiController]
     public class TableController : ControllerBase
     {
@@ -21,20 +21,41 @@ namespace JokersJunction.Server.Controllers
             _mapper = mapper;
         }
 
-        [HttpGet]
-        public async Task<ActionResult<GetTablesResult<T>>> GetTables<T>() where T : Table
+        [HttpGet("p-table")]
+        public async Task<ActionResult<GetPokerTablesResult>> GetPokerTables()
         {
             try
             {
-                return (new GetTablesResult<T>
+                return (new GetPokerTablesResult
                 {
                     Successful = true,
-                    Tables = await _tableRepository.GetTables<T>()
+                    Tables = await _tableRepository.GetPokerTables()
                 });
             }
             catch (Exception)
             {
-                return (new GetTablesResult<T>
+                return (new GetPokerTablesResult
+                {
+                    Successful = false,
+                    Error = "Error processing request"
+                });
+            }
+        }
+
+        [HttpGet("b-table")]
+        public async Task<ActionResult<GetBlackjackTablesResult>> GetBlackjackTables()
+        {
+            try
+            {
+                return (new GetBlackjackTablesResult
+                {
+                    Successful = true,
+                    Tables = await _tableRepository.GetBlackjackTables()
+                });
+            }
+            catch (Exception)
+            {
+                return (new GetBlackjackTablesResult
                 {
                     Successful = false,
                     Error = "Error processing request"
@@ -43,8 +64,8 @@ namespace JokersJunction.Server.Controllers
         }
 
         //[Authorize(Roles = "Admin")]
-        [HttpPost]
-        public async Task<ActionResult<CreateTableResult>> Create<T>([FromBody] CreateTableModel model) where T : Table
+        [HttpPost("p-table")]
+        public async Task<ActionResult<CreateTableResult>> CreatePoker([FromBody] CreateTableModel model)
         {
             try
             {
@@ -57,7 +78,7 @@ namespace JokersJunction.Server.Controllers
                     };
                 }
 
-                var table = await _tableRepository.GetTableByName<T>(model.Name);
+                var table = await _tableRepository.GetPokerTableByName(model.Name);
 
                 if (table != null)
                 {
@@ -68,7 +89,48 @@ namespace JokersJunction.Server.Controllers
                     });
                 }
 
-                await _tableRepository.AddTable(_mapper.Map<PokerTable>(model));
+                await _tableRepository.AddPokerTable(_mapper.Map<PokerTable>(model));
+
+                return Ok(new CreateTableResult
+                {
+                    Successful = true
+                });
+            }
+            catch (Exception)
+            {
+                return new CreateTableResult
+                {
+                    Successful = false,
+                    Errors = new List<string>() { "Unexpected error occured. Try again or contact support" }
+                };
+            }
+        }
+        [HttpPost("b-table")]
+        public async Task<ActionResult<CreateTableResult>> CreateBlackjack([FromBody] CreateTableModel model)
+        {
+            try
+            {
+                if (model == null)
+                {
+                    return new CreateTableResult
+                    {
+                        Successful = false,
+                        Errors = new List<string>() { "Invalid table model" }
+                    };
+                }
+
+                var table = await _tableRepository.GetBlackjackTableByName(model.Name);
+
+                if (table != null)
+                {
+                    return Ok(new CreateTableResult
+                    {
+                        Successful = false,
+                        Errors = new List<string>() { "Table with this name already exists" }
+                    });
+                }
+
+                await _tableRepository.AddBlackjackTable(_mapper.Map<BlackjackTable>(model));
 
                 return Ok(new CreateTableResult
                 {
@@ -85,12 +147,26 @@ namespace JokersJunction.Server.Controllers
             }
         }
 
-        [HttpGet("{id:int}")]
-        public async Task<ActionResult<T>> GetTableById<T>(int id) where T : Table
+        [HttpGet("p-table/{id:int}")]
+        public async Task<ActionResult<PokerTable>> GetPokerTableById(int id)
         {
             try
             {
-                return await _tableRepository.GetTableById<T>(id);
+                return await _tableRepository.GetPokerTableById(id) ?? throw new InvalidOperationException();
+            }
+            catch (Exception)
+            {
+                return NotFound();
+                // ignored
+            }
+        }
+
+        [HttpGet("b-table/{id:int}")]
+        public async Task<ActionResult<BlackjackTable>> GetBlackjackTableById(int id)
+        {
+            try
+            {
+                return await _tableRepository.GetBlackjackTableById(id) ?? throw new InvalidOperationException();
             }
             catch (Exception)
             {
@@ -100,12 +176,34 @@ namespace JokersJunction.Server.Controllers
         }
 
         //[Authorize(Roles = "Admin")]
-        [HttpPost("delete")]
-        public async Task<ActionResult<DeleteTableResult>> DeleteTable<T>([FromBody]int tableId) where T: Table
+        [HttpPost("p-table/delete")]
+        public async Task<ActionResult<DeleteTableResult>> DeletePokerTable([FromBody]int tableId)
         {
             try
             {
-                await _tableRepository.DeleteTable<T>(tableId);
+                await _tableRepository.DeletePokerTable(tableId);
+                return (new DeleteTableResult
+                {
+                    Successful = true
+                });
+
+            }
+            catch (Exception)
+            {
+                return (new DeleteTableResult
+                {
+                    Successful = false,
+                    Error = "Error processing request"
+                });
+            }
+        }
+
+        [HttpPost("´b-table/delete")]
+        public async Task<ActionResult<DeleteTableResult>> DeleteBlackjackTable([FromBody] int tableId)
+        {
+            try
+            {
+                await _tableRepository.DeleteBlackjackTable(tableId);
                 return (new DeleteTableResult
                 {
                     Successful = true

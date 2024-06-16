@@ -39,7 +39,7 @@ public class BlackjackTableListBase : ComponentBase
     {
         ShowError = false;
 
-        var result = await TableService.GetList<BlackjackTable>();
+        var result = await TableService.GetBlackjackList();
 
         if (result.Successful)
         {

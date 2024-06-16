@@ -1,6 +1,7 @@
 ﻿using Blazored.Modal.Services;
 using Microsoft.AspNetCore.Components;
 using JokersJunction.Client.Components;
+using JokersJunction.Client.Pages.Table_Lists;
 
 namespace JokersJunction.Client.Pages
 {

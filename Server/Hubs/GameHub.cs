@@ -63,7 +63,7 @@ public class GameHub : Hub
                     {
                         UpdatePot(tableId);
                         GetAndAwardWinners(tableId);
-                        PlayerStateRefresh(tableId);
+                        PokerPlayerStateRefresh(tableId);
                         smallBlindIndexTemp = pokerGame.SmallBlindIndex;
                         PokerGames.Remove(pokerGame);
                         await Task.Delay(10000);
@@ -98,7 +98,7 @@ public class GameHub : Hub
             }
             else
             {
-                PlayerStateRefresh(tableId);
+                PokerPlayerStateRefresh(tableId);
             }
         }
         catch (Exception)
@@ -107,9 +107,9 @@ public class GameHub : Hub
         }
     }
 
-    public async Task AddToUsers<T>(int tableId) where T:Table
+    public async Task AddToUsersToPokerTable(int tableId)
     {
-        var currentTable = await _tableRepository.GetTableById<T>(tableId);
+        var currentTable = await _tableRepository.GetPokerTableById(tableId);
 
         if (Users.Count(e => e.TableId == tableId) >= currentTable.MaxPlayers)
         {
@@ -138,7 +138,40 @@ public class GameHub : Hub
             Balance = 0
         });
 
-        PlayerStateRefresh(tableId);
+        PokerPlayerStateRefresh(tableId);
+    }
+    public async Task AddToUsersToBlackjack(int tableId)
+    {
+        var currentTable = await _tableRepository.GetBlackjackTableById(tableId);
+
+        if (Users.Count(e => e.TableId == tableId) >= currentTable.MaxPlayers)
+        {
+            await Clients.Client(Context.ConnectionId).SendAsync("ReceiveKick");
+            return;
+        }
+
+        if (Users.Any(e => e.Name == Context.User.Identity.Name))
+        {
+            await Clients.Client(Context.ConnectionId).SendAsync("ReceiveKick");
+            return;
+        }
+
+        await Groups.AddToGroupAsync(Context.ConnectionId, tableId.ToString());
+
+        var newSeatNumber = AssignTableToUser(tableId);
+        var name = Context.User.Identity.Name;
+
+        Users.Add(new User
+        {
+            Name = name,
+            TableId = tableId,
+            ConnectionId = Context.ConnectionId,
+            SeatNumber = newSeatNumber,
+            InGame = false,
+            Balance = 0
+        });
+
+        BlackjackPlayerStateRefresh(tableId);
     }
 
     private static int AssignTableToUser(int tableId)
@@ -162,7 +195,7 @@ public class GameHub : Hub
         await Deposit(depositAmount, user);
 
         Users.First(e => e.Name == user).IsReady = true;
-        PlayerStateRefresh(tableId);
+        PokerPlayerStateRefresh(tableId);
 
         if (Users.Where(e => e.TableId == tableId).Count(e => e.IsReady) >= 2 && PokerGames.All(e => e.TableId != tableId))
         {
@@ -191,7 +224,7 @@ public class GameHub : Hub
         await Withdraw(user);
         Users.First(e => e.Name == user).IsReady = false;
 
-        PlayerStateRefresh(GetTableByUser(Context.User.Identity.Name));
+        PokerPlayerStateRefresh(GetTableByUser(Context.User.Identity.Name));
     }
 
     private async Task Withdraw(string userName)
@@ -334,7 +367,7 @@ public class GameHub : Hub
     private async Task StartPokerGame(int tableId, int smallBlindPosition)
     {
         //Initialize Game
-        var currentTableInfo = await _tableRepository.GetTableById<PokerTable>(tableId);
+        var currentTableInfo = await _tableRepository.GetPokerTableById(tableId);
 
         var newGame = new PokerGame(tableId, smallBlindPosition, currentTableInfo.SmallBlind);
 
@@ -396,7 +429,7 @@ public class GameHub : Hub
 
         //Notify about the end of preparations
 
-        PlayerStateRefresh(tableId);
+        PokerPlayerStateRefresh(tableId);
 
         await Clients.Group(tableId.ToString())
             .SendAsync("ReceiveTurnPlayer", newGame.GetPlayerNameByIndex(newGame.Index));
@@ -428,7 +461,7 @@ public class GameHub : Hub
             {
                 UpdatePot(tableId);
                 GetAndAwardWinners(tableId);
-                PlayerStateRefresh(tableId);
+                PokerPlayerStateRefresh(tableId);
 
                 Thread.Sleep(10000);
 
@@ -444,7 +477,7 @@ public class GameHub : Hub
                     {
                         e.InGame = false;
                     }
-                    PlayerStateRefresh(tableId);
+                    PokerPlayerStateRefresh(tableId);
                 }
             }
             else
@@ -589,12 +622,12 @@ public class GameHub : Hub
                 {
                     e.InGame = false;
                 }
-                PlayerStateRefresh(tableId);
+                PokerPlayerStateRefresh(tableId);
             }
         }
         else
         {
-            PlayerStateRefresh(tableId);
+            PokerPlayerStateRefresh(tableId);
             await Clients.Group(tableId.ToString())
                 .SendAsync("ReceiveTurnPlayer",
                     currentGame.GetPlayerNameByIndex(PokerGames.First(e => e.TableId == tableId).Index));
@@ -634,7 +667,7 @@ public class GameHub : Hub
 
             case CommunityCardsActions.River:
                 GetAndAwardWinners(tableId);
-                PlayerStateRefresh(tableId);
+                PokerPlayerStateRefresh(tableId);
                 PokerGames.First(e => e.TableId == tableId).CommunityCardsActions++;
                 break;
         }
@@ -698,7 +731,7 @@ public class GameHub : Hub
         }
     }
 
-    public void PlayerStateRefresh(int tableId)
+    public void PokerPlayerStateRefresh(int tableId)
     {
         var playerState = new PlayerStateModel();
 

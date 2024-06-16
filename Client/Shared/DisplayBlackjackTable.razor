@@ -1,0 +1,16 @@
+﻿@inherits DisplayBlackjackTableBase
+
+<div class="card m-3" style="min-width: 18rem; max-width: 30.5%;">
+    <div class="card-header">
+        <h3>
+            @CurrentTable.Name
+        </h3>
+    </div>
+
+    <img class="card-img-top imageThumbnail" src="img/tableimg.png" />
+    <div class="card-footer text-center">
+        <AuthorizeView Roles="User">
+            <button @onclick="@JoinTable" class="btn btn-danger m-1">Join Room</button>
+        </AuthorizeView>
+    </div>
+</div>

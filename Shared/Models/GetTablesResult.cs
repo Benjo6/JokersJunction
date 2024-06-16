@@ -1,8 +1,15 @@
 ﻿namespace JokersJunction.Shared.Models
 {
-    public class GetTablesResult<T> where T : Table
+    public class GetPokerTablesResult
     {
-        public IEnumerable<T> Tables { get; set; } 
+        public IEnumerable<PokerTable> Tables { get; set; } 
+        public bool Successful { get; set; }
+        public string Error { get; set; }
+    }
+
+    public class GetBlackjackTablesResult
+    {
+        public IEnumerable<BlackjackTable> Tables { get; set; }
         public bool Successful { get; set; }
         public string Error { get; set; }
     }

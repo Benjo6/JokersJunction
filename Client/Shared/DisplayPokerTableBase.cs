@@ -8,13 +8,13 @@ using Microsoft.AspNetCore.Components;
 
 namespace JokersJunction.Client.Shared
 {
-    public class DisplayTableBase<T> : ComponentBase where T : Table
+    public class DisplayPokerTableBase : ComponentBase
     {
         [Parameter]
         public EventCallback<string> OnChange { get; set; }
 
         [Parameter]
-        public T CurrentTable { get; set; }
+        public PokerTable CurrentTable { get; set; }
 
         [Inject] public ITableService TableService { get; set; }
 
@@ -41,15 +41,7 @@ namespace JokersJunction.Client.Shared
         protected async Task JoinTable()
         {
             await LocalStorageService.SetItemAsync("currentTable", CurrentTable.Id);
-            if (typeof(T) == typeof(BlackjackTable))
-            {
-                NavigationManager.NavigateTo("/Blackjack-Game");
-            }
-
-            if (typeof(T) == typeof(PokerTable))
-            {
-                NavigationManager.NavigateTo("/Poker-Game");
-            }
+            NavigationManager.NavigateTo("/Poker-Game");
         }
     }
 }

@@ -20,7 +20,7 @@ namespace JokersJunction.Client.Components
         protected async Task CreateTable()
         {
             ShowErrors = false;
-            var result = await TableService.Create(PokerTable);
+            var result = await TableService.CreatePoker(PokerTable);
             if (result.Successful)
             {
                 BlazoredModal.Close();

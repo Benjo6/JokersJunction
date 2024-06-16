@@ -15,7 +15,7 @@ else
     <div class="card-deck">
         @foreach (var table in PokerTables)
         {
-            <DisplayTable T="PokerTable" Table="table" OnChange="UpdateHandler"></DisplayTable>
+            <DisplayPokerTable CurrentTable="table" OnChange="UpdateHandler"></DisplayPokerTable>
         }
     </div>
 }

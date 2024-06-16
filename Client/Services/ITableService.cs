@@ -5,12 +5,19 @@ namespace JokersJunction.Client.Services
 {
     public interface ITableService
     {
-        Task<CreateTableResult> Create(CreateTableModel model);
+        Task<CreateTableResult> CreatePoker(CreateTableModel model);
 
-        Task<GetTablesResult<T>> GetList<T>() where T : Table;
+        Task<CreateTableResult> CreateBlackjack(CreateTableModel model);
 
-        Task<T> GetById<T>(int id) where T:Table;
+        Task<GetBlackjackTablesResult> GetBlackjackList();
 
-        Task<DeleteTableResult> Delete(int id);
+        Task<GetPokerTablesResult> GetPokerList();
+
+        Task<PokerTable> GetByPokerId(int id);
+        Task<BlackjackTable> GetByBlackjackId(int id);
+
+        Task<DeleteTableResult> DeletePoker(int id);
+        Task<DeleteTableResult> DeleteBlackjack(int id);
+
     }
 }

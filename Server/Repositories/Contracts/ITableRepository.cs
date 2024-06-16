@@ -4,15 +4,18 @@ namespace JokersJunction.Server.Repositories.Contracts
 {
     public interface ITableRepository
     {
-        public Task<IEnumerable<T>> GetTables<T>() where T : Table;
+        public Task<IEnumerable<PokerTable>> GetPokerTables();
+        public Task<IEnumerable<BlackjackTable>> GetBlackjackTables();
+        public Task<PokerTable?> GetPokerTableById(int tableId);
+        public Task<BlackjackTable?> GetBlackjackTableById(int tableId);
+        public Task<PokerTable?> GetPokerTableByName(string tableName);
+        public Task<BlackjackTable?> GetBlackjackTableByName(string tableName);
+        public Task<PokerTable> AddPokerTable(PokerTable table);
+        public Task<BlackjackTable> AddBlackjackTable(BlackjackTable table);
+        public Task<PokerTable> UpdatePokerTable(PokerTable table);
+        public Task<BlackjackTable> UpdateBlackjackTable(BlackjackTable table);
+        public Task<PokerTable> DeletePokerTable(int tableId);
+        public Task<BlackjackTable> DeleteBlackjackTable(int tableId);
 
-        public Task<T> GetTableById<T>(int tableId) where T:Table;
-        public Task<T> GetTableByName<T>(string tableName) where T:Table;
-
-        public Task<T> AddTable<T>(T table) where T:Table;
-
-        public Task<T> UpdateTable<T>(T table) where T:Table;
-
-        public Task<T> DeleteTable<T>(int tableId) where T:Table;
     }
 }
