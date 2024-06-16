@@ -79,11 +79,11 @@ app.UseRouting();
 // Add this middleware to validate the token and set HttpContext.User
 app.Use(async (context, next) =>
 {
-    var token = context.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
+    var token = context.Request.Query["access_token"].FirstOrDefault()?.Split(" ").Last();
     if (token != null)
     {
         var tokenHandler = new JwtSecurityTokenHandler();
-        var key = Encoding.ASCII.GetBytes(builder.Configuration["JwtSecurityKey"]!);
+        var key = Encoding.ASCII.GetBytes(builder.Configuration["JwtSecurityKey"]);
         var principal = tokenHandler.ValidateToken(token, new TokenValidationParameters
         {
             ValidateIssuerSigningKey = true,

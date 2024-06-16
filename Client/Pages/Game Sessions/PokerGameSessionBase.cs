@@ -36,9 +36,13 @@ namespace JokersJunction.Client.Pages.Game_Sessions
         protected override async Task OnInitializedAsync()
         {
             AuthState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            var savedToken = await LocalStorageService.GetItemAsync<string>("authToken");
 
             _hubConnection = new HubConnectionBuilder()
-                .WithUrl(NavigationManager.ToAbsoluteUri("/gameHub"))
+                .WithUrl(NavigationManager.ToAbsoluteUri("/GameHub"), options =>
+                {
+                    options.AccessTokenProvider = () => Task.FromResult(savedToken);
+                })
                 .Build();
 
             _hubConnection.On("ReceiveMessage", (object message) =>
