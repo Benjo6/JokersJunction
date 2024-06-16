@@ -1,13 +1,6 @@
 ﻿@inherits NavMenuBase
 
-<div class="top-row pl-4 navbar navbar-dark">
-    <a class="navbar-brand" href="">Poker.Web</a>
-    <button class="navbar-toggler" @onclick="ToggleNavMenu">
-        <span class="navbar-toggler-icon"></span>
-    </button>
-</div>
-
-<div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
+<div >
     <AuthorizeView Roles="Admin">
         <ul class="nav flex-column">
             <li class="nav-item px-3">
@@ -19,20 +12,21 @@
     </AuthorizeView>
     <AuthorizeView>
         <Authorized>
-            <div class="nav-item px-3 fixed-bottom">
-                <b class="text-white">Hello, @context.User.Identity.Name!</b>
+            <div class="nav-item px-3 fixed-top">
+                <b >Hello, @context.User.Identity.Name!</b>
                 <br />
-                <b class="text-white">You have: @Balance</b>
-
-                <hr />
-                <button @onclick="@LogOut" class="btn btn-primary">LogOut</button>
+                <b>You have: @Balance</b>
             </div>
         </Authorized>
         <NotAuthorized>
-            <div class="nav-item px-3 fixed-bottom">
-                <button @onclick="@ShowSignIn" class="btn btn-primary">SignIn </button>
-                <button @onclick="@ShowLogin" class="btn btn-primary">Login </button>
-            </div>
+            <section class="container-fluid centered-container">
+                <button @onclick="@ShowLogin" class="goldcard m-5">
+                    Login
+                </button>
+                <button @onclick="@ShowSignIn" class="card2 m-5">
+                    Register
+                </button>
+            </section>
         </NotAuthorized>
     </AuthorizeView>
 </div>
