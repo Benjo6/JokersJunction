@@ -50,39 +50,19 @@ public class GameHub : Hub
 
             if (Users.First(e => e.Name == user).InGame)
             {
-                // Handle Poker game disconnection
-                var pokerGame = PokerGames.FirstOrDefault(e => e.TableId == tableId);
-                if (pokerGame != null)
+                foreach (var player in PokerGames.SelectMany(game => game.Players.Where(player => player.Name == user)))
                 {
-                    foreach (var player in pokerGame.Players.Where(player => player.Name == user))
-                    {
-                        player.ActionState = PlayerActionState.Left;
-                    }
-
-                    if (pokerGame.Players.Count(e => e.ActionState != PlayerActionState.Left) < 2)
-                    {
-                        UpdatePot(tableId);
-                        GetAndAwardWinners(tableId);
-                        PokerPlayerStateRefresh(tableId);
-                        smallBlindIndexTemp = pokerGame.SmallBlindIndex;
-                        PokerGames.Remove(pokerGame);
-                        await Task.Delay(10000);
-                    }
+                    player.ActionState = PlayerActionState.Left;
                 }
 
-                // Handle Blackjack game disconnection
-                var blackjackGame = BlackjackGames.FirstOrDefault(e => e.TableId == tableId);
-                if (blackjackGame != null)
+                if (PokerGames.First(e => e.TableId == tableId).Players.Count(e => e.ActionState != PlayerActionState.Left) < 2)
                 {
-                    var player = blackjackGame.Players.FirstOrDefault(p => p.Name == user);
-                    if (player != null)
-                    {
-                        blackjackGame.Players.Remove(player);
-                        if (blackjackGame.Players.Count == 0)
-                        {
-                            BlackjackGames.Remove(blackjackGame);
-                        }
-                    }
+                    UpdatePot(tableId);
+                    GetAndAwardWinners(tableId);
+                    PokerPlayerStateRefresh(tableId);
+                    smallBlindIndexTemp = PokerGames.First(e => e.TableId == tableId).SmallBlindIndex;
+                    PokerGames.Remove(PokerGames.FirstOrDefault(e => e.TableId == tableId));
+                    Thread.Sleep(10000);
                 }
             }
 
@@ -103,9 +83,10 @@ public class GameHub : Hub
         }
         catch (Exception)
         {
-            // Log
+            //Log
         }
     }
+
 
     public async Task AddToUsersToPokerTable(int tableId)
     {
@@ -213,7 +194,6 @@ public class GameHub : Hub
             await _userManager.UpdateAsync(user);
             Users.First(e => e.Name == user.UserName).Balance = depositAmount;
         }
-
     }
 
     public async Task UnmarkReady()
@@ -374,7 +354,7 @@ public class GameHub : Hub
         //Adding players to table
         foreach (var user in Users.Where(user => user.IsReady && user.TableId == tableId))
         {
-            newGame.Players.Add(new PokerPlayer { Name = user.Name, RoundBet = 0 });
+            newGame.Players.Add(new PokerPlayer() { Name = user.Name, RoundBet = 0 });
             user.InGame = true;
         }
 
@@ -398,7 +378,7 @@ public class GameHub : Hub
 
         //Big blind
         if (Users.First(e => e.Name == newGame.GetPlayerNameByIndex(newGame.BigBlindIndex)).Balance >=
-            newGame.SmallBlind * 2)
+newGame.SmallBlind * 2)
         {
             Users.First(e => e.Name == newGame.GetPlayerNameByIndex(newGame.BigBlindIndex)).Balance -=
                 newGame.SmallBlind * 2;
@@ -553,7 +533,6 @@ public class GameHub : Hub
                 PokerGames.First(e => e.TableId == tableId).Players.First(e => e.Name == Context.User.Identity.Name).RoundBet = allInSum;
             }
             await MoveIndex(tableId, currentGame);
-
         }
     }
 
@@ -602,8 +581,8 @@ public class GameHub : Hub
                 }
             }
         } while ((currentGame.GetPlayerByIndex(currentGame.Index).ActionState != PlayerActionState.Playing || Users.First(e => e.Name == currentGame.GetPlayerByIndex(currentGame.Index).Name).Balance == 0
-                     || currentGame.Players.Count(e => e.ActionState == PlayerActionState.Playing) < 2) && PokerGames.First(e => e.TableId == tableId).CommunityCardsActions !=
-                 CommunityCardsActions.AfterRiver);
+                             || currentGame.Players.Count(e => e.ActionState == PlayerActionState.Playing) < 2) && PokerGames.First(e => e.TableId == tableId).CommunityCardsActions !=
+                             CommunityCardsActions.AfterRiver);
 
         if (PokerGames.First(e => e.TableId == tableId).CommunityCardsActions ==
             CommunityCardsActions.AfterRiver)

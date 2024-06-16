@@ -83,7 +83,7 @@ app.Use(async (context, next) =>
     if (token != null)
     {
         var tokenHandler = new JwtSecurityTokenHandler();
-        var key = Encoding.ASCII.GetBytes(builder.Configuration["JwtSecurityKey"]);
+        var key = Encoding.ASCII.GetBytes(builder.Configuration["JwtSecurityKey"]!);
         var principal = tokenHandler.ValidateToken(token, new TokenValidationParameters
         {
             ValidateIssuerSigningKey = true,

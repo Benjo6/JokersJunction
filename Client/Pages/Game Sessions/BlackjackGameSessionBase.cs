@@ -1,16 +1,16 @@
 ﻿using Blazored.LocalStorage;
 using Blazored.Modal.Services;
+using JokersJunction.Client.Components;
 using JokersJunction.Client.Services;
+using JokersJunction.Shared;
 using JokersJunction.Shared.Models;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.SignalR.Client;
 using Newtonsoft.Json;
-using Microsoft.AspNetCore.Components.Web;
-using JokersJunction.Client.Components;
-using JokersJunction.Shared;
 
-namespace JokersJunction.Client.Pages.Gamesession;
+namespace JokersJunction.Client.Pages.Game_Sessions;
 
 public class BlackjackGameSessionBase : ComponentBase
 {
@@ -113,7 +113,7 @@ public class BlackjackGameSessionBase : ComponentBase
 
         await _hubConnection.StartAsync();
 
-        await _hubConnection.SendAsync("AddToUsers", await LocalStorageService.GetItemAsync<int>("currentTable"));
+        await _hubConnection.SendAsync("AddToUsersToBlackjack", await LocalStorageService.GetItemAsync<int>("currentTable"));
 
         GameInformation.PlayersNotes = (await PlayerNoteService.GetList()).PlayerNotes;
 
