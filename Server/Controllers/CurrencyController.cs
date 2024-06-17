@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using JokersJunction.Shared;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
+using Azure.Core;
 
 namespace JokersJunction.Server.Controllers
 {
@@ -40,18 +41,23 @@ namespace JokersJunction.Server.Controllers
 
         }
 
-        [Authorize(Roles = "User,Admin")]
-        [HttpGet]
-        public async Task<int> Balance()
+        //[Authorize(Roles = "User,Admin")]
+        [HttpGet("balance/{userName}")]
+        public async Task<int> Balance(string userName)
         {
-            var usernameClaim = HttpContext.User.FindFirst(ClaimTypes.Name);
-            if (usernameClaim == null)
+            try
             {
+                var user = await _userManager.FindByNameAsync(userName);
+                var balance = user?.Currency ?? 0;
+                return balance;
+            }
+            catch (Exception ex)
+            {
+                // Log the exception
+                Console.WriteLine($"Error getting balance: {ex.Message}");
             }
 
-            var username = usernameClaim.Value;
-            var user = await _userManager.FindByNameAsync(username);
-            return user.Currency;
+            return -1;
         }
 
 

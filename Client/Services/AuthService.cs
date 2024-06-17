@@ -42,14 +42,28 @@ namespace JokersJunction.Client.Services
         }
         public async Task<int> GetBalance()
         {
-            var response = await _httpClient.GetAsync("api/currency");
-            if (response.IsSuccessStatusCode)
-            {
-                var result = await response.Content.ReadFromJsonAsync<int>();
-                return result;
-            }
 
-            return -1;
+            try
+            {
+                var userName = await GetCurrentUserName();
+                var response = await _httpClient.GetAsync($"api/currency/balance/{userName}");
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var result = await response.Content.ReadFromJsonAsync<int>();
+                    return result;
+                }
+                else
+                {
+                    // Handle error response here
+                    return -1;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error getting balance: {ex.Message}");
+                return -1;
+            }
         }
 
 
@@ -90,6 +104,13 @@ namespace JokersJunction.Client.Services
             await _localStorage.RemoveItemAsync("currentTable");
             ((ApiAuthenticationStateProvider)_authenticationStateProvider).MarkUserAsLoggedOut();
             _httpClient.DefaultRequestHeaders.Authorization = null;
+        }
+
+        private async Task<string?> GetCurrentUserName()
+        {
+            var authState = await _authenticationStateProvider.GetAuthenticationStateAsync();
+            var user = authState.User;
+            return user.Identity?.Name;
         }
     }
 }
