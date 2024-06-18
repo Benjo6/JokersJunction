@@ -37,8 +37,13 @@ public class BlackjackGameSessionBase : ComponentBase
     {
         AuthState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
 
+        var savedToken = await LocalStorageService.GetItemAsync<string>("authToken");
+
         _hubConnection = new HubConnectionBuilder()
-            .WithUrl(NavigationManager.ToAbsoluteUri("/gameHub"))
+            .WithUrl(NavigationManager.ToAbsoluteUri("/GameHub"), options =>
+            {
+                options.AccessTokenProvider = () => Task.FromResult(savedToken);
+            })
             .Build();
 
         _hubConnection.On("ReceiveMessage", (object message) =>
@@ -46,6 +51,12 @@ public class BlackjackGameSessionBase : ComponentBase
             var newMessage = JsonConvert.DeserializeObject<GetMessageResult>(message.ToString());
             ChatMessages.Add(newMessage);
             StateHasChanged();
+        });
+
+        _hubConnection.On("ReceiveBlackjackTurnPlayer", async () =>
+        {
+            GameInformation.CurrentPlayer = AuthState.User.Identity.Name;
+            await InvokeAsync(StateHasChanged);
         });
 
         _hubConnection.On("ReceiveBlackjackStartingHand", (object hand) =>
@@ -152,7 +163,7 @@ public class BlackjackGameSessionBase : ComponentBase
         var formModal = ModalService.Show<JoinTable>("Join table");
         var result = await formModal.Result;
         if (result.Cancelled) return;
-        await _hubConnection.SendAsync("MarkReady", result.Data);
+        await _hubConnection.SendAsync("BlackjackMarkReady", result.Data);
         StateService.CallRequestRefresh();
         await Task.Delay(500);
         StateService.CallRequestRefresh();
@@ -160,7 +171,7 @@ public class BlackjackGameSessionBase : ComponentBase
 
     protected async Task UnmarkReady()
     {
-        await _hubConnection.SendAsync("UnmarkReady");
+        await _hubConnection.SendAsync("BlackjackUnmarkReady");
         StateService.CallRequestRefresh();
         await Task.Delay(500);
         StateService.CallRequestRefresh();
