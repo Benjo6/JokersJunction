@@ -30,6 +30,7 @@ namespace JokersJunction.Client.Pages.Game_Sessions
         public PokerGameInformation GameInformation { get; set; } = new() { Players = new List<GamePlayer>() };
 
         public string MessageInput { get; set; } = string.Empty;
+        public bool IsChatVisible { get; private set; }
 
         public List<GetMessageResult> ChatMessages = new();
 
@@ -199,5 +200,11 @@ namespace JokersJunction.Client.Pages.Game_Sessions
                 await SendMessage();
             }
         }
+
+        protected void ToggleChat()
+        {
+            IsChatVisible = !IsChatVisible;
+        }
+
     }
 }

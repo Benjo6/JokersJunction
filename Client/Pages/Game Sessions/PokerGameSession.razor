@@ -9,48 +9,68 @@
 else
 {
     <section class="container-fluid centered-container">
-        <div class="row justify-content-center">
-            <div class="col">
-                <div class="oval-table">
-                    <div class="oval-table-center"></div>
-                    <div class="oval-table-seats">
-                        @foreach (var player in GameInformation.Players)
-                        {
-                            <div class="oval-seat" style="@($"transform: rotate({(player.SeatNumber * (360 / GameInformation.Players.Count()))}deg) translate(0, -150px)")">
-                                @if (player != null)
-                                {
-                                    <div class="player-info">
-                                        <p>@player.Username @player.GameMoney</p>
-                                        <SessionPlayerInfo GameInformation="@GameInformation" GamePlayer="@player" />
-                                    </div>
-                                }
-                                else
-                                {
-                                    <p>Empty seat</p>
-                                }
-                            </div>
-                        }
-                    </div>
+        <div class="poker-table">
+            <!-- Player seats -->
+            @for (int i = 0; i < 4; i++) // Changed from 6 to 4 for a 4-player game
+            {
+                <div class="seat">
+                    @if (GameInformation.Players.Count() > i && GameInformation.Players[i] != null)
+                    {
+                        <SessionPlayerInfo GameInformation="@GameInformation" GamePlayer="@GameInformation.Players[i]" />
+                    }
+                    else
+                    {
+                        <p>Empty seat</p>
+                    }
                 </div>
+            }
+
+            <!-- Central table area -->
+            <div class="table-center">
+                @if (GameInformation.GameInProgress && GameInformation.TableCards.Count > 0)
+                {
+                    <div class="community-cards">
+                    @foreach (var card in GameInformation.TableCards)
+                    {
+                        <img style="height: 100px; width: auto" src="img/Cards/@string.Join("",card.CardNumber.ToString(),card.CardSuit.ToString(),".png")" alt="Card image" />
+                    }
+                    <br>
+                    @if (GameInformation.Pots.Any())
+                    {
+                        @foreach (var pot in GameInformation.Pots)
+                        {
+                            if (string.IsNullOrEmpty(pot.Winner))
+                            {
+                                <p>Pot Amount: @pot.PotAmount</p>
+                            }
+                            else
+                            {
+                                <p>@pot.Winner won @pot.PotAmount</p>
+                            }
+                        }
+                    }
+                    </div>
+                }
             </div>
         </div>
+
+        <!-- Chat and action buttons -->
         <div class="row justify-content-between fixed-bottom mb-3 mr-3">
             <div class="col-6 text-left">
-                <div class="card chat-card">
+                <button class="btn btn-secondary" type="button" @onclick="ToggleChat">Chat</button>
+                <div class="card chat-card" style="@($"display: {(IsChatVisible ? "block" : "none")};")">
                     <div class="card-header">
                         <h5 class="card-title">Chat Service</h5>
                     </div>
-                    <div class="card-body overflow-auto" style="max-height: 300px;">
-                        <div class="message-container">
-                            @foreach (var message in ChatMessages)
-                            {
-                                <div class="message">
-                                    <p class="message-text">@message.Sender: @message.Message</p>
-                                </div>
-                            }
-                        </div>
+                    <div class="card-body chat-messages" style="overflow-auto; max-height: 300px;">
+                        @foreach (var message in ChatMessages)
+                        {
+                            <div class="message">
+                                <p class="message-text">@message.Sender: @message.Message</p>
+                            </div>
+                        }
                     </div>
-                    <div class="card-footer">
+                    <div class="card-footer chat-input">
                         <div class="input-group">
                             <input @bind="MessageInput" class="form-control inpMsg" placeholder="Type your message here" @onkeypress="SendOnEnter">
                             <div class="input-group-append">
@@ -61,102 +81,155 @@ else
                 </div>
             </div>
             <div class="col-md-6 align-content-end text-right">
-                @if (GameInformation.Players.FirstOrDefault(e => e.Username == AuthState.User.Identity.Name) != null &&
-               !GameInformation.Players.First(e => e.Username == AuthState.User.Identity.Name).IsReady)
-                {
-                    <button @onclick="@MarkReady" class="btn btn-primary m-1">Join game</button>
-                }
-                else
-                {
-                    <button @onclick="@UnmarkReady" class="btn btn-primary m-1">Leave game</button>
-                }
-                <button @onclick="@LeaveTable" class="btn btn-danger m-1">Leave table</button>
-            </div>
-            <div class="col-md-6 align-content-end text-right">
-                @if (GameInformation.GameInProgress && GameInformation.CurrentPlayer == AuthState.User.Identity.Name)
-                {
-                    @if (GameInformation.RaiseAmount > 0)
+                <div class="action-buttons">
+                    @if (GameInformation.Players.FirstOrDefault(e => e.Username == AuthState.User.Identity.Name) != null &&
+                   !GameInformation.Players.First(e => e.Username == AuthState.User.Identity.Name).IsReady)
                     {
-                        <button @onclick="@Call" class="btn btn-primary m-1">Call</button>
+                        <button @onclick="@MarkReady" class="btn btn-primary btn-action m-1">Join game</button>
                     }
                     else
                     {
-                        <button @onclick="@Check" class="btn btn-primary m-1">Check</button>
+                        <button @onclick="@UnmarkReady" class="btn btn-primary btn-action m-1">Leave game</button>
                     }
-                    <button @onclick="@Fold" class="btn btn-primary m-1">Fold</button>
-                    <input @bind="@GameInformation.PlayerRaise" type="number" class="form-control col-md-4 m-1">
-                    <button @onclick="@Raise" class="btn btn-primary m-1">Raise</button>
-                    <button @onclick="@AllIn" class="btn btn-primary m-1">All-In</button>
-                }
+                    <button @onclick="@LeaveTable" class="btn btn-danger btn-action m-1">Leave table</button>
+                    @if (GameInformation.GameInProgress && GameInformation.CurrentPlayer == AuthState.User.Identity.Name)
+                    {
+                        @if (GameInformation.RaiseAmount > 0)
+                        {
+                            <button @onclick="@Call" class="btn btn-primary btn-action m-1">Call</button>
+                        }
+                        else
+                        {
+                            <button @onclick="@Check" class="btn btn-primary btn-action m-1">Check</button>
+                        }
+                        <button @onclick="@Fold" class="btn btn-primary btn-action m-1">Fold</button>
+                        <input @bind="@GameInformation.PlayerRaise" type="number" class="form-control col-md-4 m-1">
+                        <button @onclick="@Raise" class="btn btn-primary btn-action m-1">Raise</button>
+                        <button @onclick="@AllIn" class="btn btn-primary btn-action m-1">All-In</button>
+                    }
+                </div>
             </div>
         </div>
     </section>
 }
 
+
 <style>
-    .oval-table {
-        width: 600px;
-        height: 300px;
-        background-color: green; /* Color of the poker table */
-        border-radius: 50%;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .oval-table-center {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        width: 100px;
-        height: 100px;
-        background-color: brown; /* Color of the center of the table */
-        border-radius: 50%;
-    }
-
-    .oval-table-seats {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        width: 100%;
-        height: 100%;
+    .centered-container {
         display: flex;
         justify-content: center;
         align-items: center;
+        height: 100vh;
     }
 
-    .oval-seat {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform-origin: center bottom;
-        text-align: center;
+    .poker-table {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        grid-template-rows: repeat(3, 1fr);
+        gap: 10px;
+        width: 1200px;
+        height: 1000px;
+        margin: auto;
     }
 
-    .player-info {
-        background-color: #fff;
-        padding: 10px;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    .seat {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: #8c4e16; /* White seats */
+        border-radius: 10px; /* Rounded corners for the seats */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+        /* Add additional styling as needed */
+    }
+
+    .table-center {
+        grid-column: 2;
+        grid-row: 2;
+        z-index: 1;
+        background-color: #116611; /* Green table color */
+        border-radius: 20px; /* Rounded corners for the table */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+        /* Add additional styling as needed */
+    }
+
+    /* Position player seats around the table */
+    .seat:nth-child(1) {
+        grid-column: 2;
+        grid-row: 1;
+    }
+
+    .seat:nth-child(2) {
+        grid-column: 2;
+        grid-row: 3;
+    }
+
+    .seat:nth-child(3) {
+        grid-column: 1;
+        grid-row: 2;
+    }
+
+    .seat:nth-child(4) {
+        grid-column: 3;
+        grid-row: 2;
+    }
+    /* Add more seats as needed based on the number of players */
+
+    .card {
+        width: 60px;
+        height: 90px;
+        object-fit: cover;
+    }
+
+    .community-cards {
+        display: flex;
+        justify-content: space-around;
+        width: 100%;
+    }
+
+    .card {
+        width: 60px;
+        height: 90px;
+        object-fit: cover;
     }
 
     .chat-card {
         width: 500px;
         height: 350px;
-        background-color: rgba(20,20,20,0.2)
+        background-color: rgba(255,255,255,0.9); /* Light background for better readability */
+        border: 1px solid #ccc; /* Add a subtle border */
     }
 
-    .card {
-        margin-bottom: 10px;
+    .chat-messages {
+        flex-grow: 1;
+        overflow-y: auto; /* Enables vertical scrolling */
+        flex-grow: 1;
+        padding: 0 10px;
     }
 
-    .chatText {
-        color: yellow;
-        font-size: 14px;
+    .chat-input {
+        bottom: 0;
+        position: fixed;
+        width: 500px;
     }
 
-    .inpMsg {
-        background-color: rgba(20,20,20,0.2);
+    .action-buttons {
+        display: flex;
+        justify-content: space-around;
+        padding: 10px;
+    }
+
+    .btn-action {
+        flex: 1; /* Equal width for all buttons */
+        margin: 0 5px; /* Spacing between buttons */
+    }
+
+    .winner-announcement {
+        background-color: #dff0d8; /* Light green background */
+        color: #3c763d; /* Dark green text */
+        padding: 15px;
+        margin-bottom: 20px;
+        border: 1px solid #d6e9c6; /* Light green border */
+        border-radius: 4px;
+        text-align: center;
     }
 </style>
