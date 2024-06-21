@@ -131,13 +131,24 @@ public class BlackjackGameSessionBase : ComponentBase
         await base.OnInitializedAsync();
     }
 
+    protected async Task Start()
+    {
+        // Place an automatic bet of 100
+        await _hubConnection.SendAsync("BlackjackBet", AuthState.User.Identity.Name, 100);
+
+        // Deal the initial cards
+        await _hubConnection.SendAsync("DealInitialCards", AuthState.User.Identity.Name);
+    }
+
     protected async Task Hit()
     {
+        // Ask for one more card
         await _hubConnection.SendAsync("BlackjackHit", AuthState.User.Identity.Name);
     }
 
     protected async Task Stand()
     {
+        // Stop with the current cards
         await _hubConnection.SendAsync("BlackjackStand", AuthState.User.Identity.Name);
     }
 
