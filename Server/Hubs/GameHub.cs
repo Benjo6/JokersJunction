@@ -622,7 +622,6 @@ newGame.SmallBlind * 2)
             }
             await BlackjackPlayerStateRefresh(tableId);
 
-            await Clients.Client(user.ConnectionId).SendAsync("ReceiveBlackjackStartingHand", player.HandCards);
             await Clients.Group(tableId.ToString()).SendAsync("ReceiveBlackjackDealerHand", game.DealerHand.First());
         }
     }
@@ -696,7 +695,8 @@ newGame.SmallBlind * 2)
 
         if (activeBlackjackGame != null)
         {
-            playerState.GameInProgress = true; // assuming game is in progress if it's listed
+            playerState.GameInProgress = true;
+            playerState.DealerCards = activeBlackjackGame.DealerHand; // assuming game is in progress if it's listed
         }
 
         var blackjackGamePlayers = activeBlackjackGame?.Players;
@@ -730,6 +730,7 @@ newGame.SmallBlind * 2)
             while (game.GetDealerHandValue() < 17)
             {
                 game.DealerHand.Add(game.Deck.DrawCards(1).First());
+                await BlackjackPlayerStateRefresh(tableId);
             }
 
             foreach (var player in game.Players)

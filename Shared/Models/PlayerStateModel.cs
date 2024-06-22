@@ -24,6 +24,7 @@
     {
         public List<GamePlayer> Players { get; set; }
         public List<Card> HandCards { get; set; }
+        public List<Card> DealerCards { get; set; }
         public bool GameInProgress { get; set; }
         public BlackjackPlayerStateModel()
         {

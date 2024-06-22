@@ -59,17 +59,11 @@ public class BlackjackGameSessionBase : ComponentBase
             await InvokeAsync(StateHasChanged);
         });
 
-        _hubConnection.On("ReceiveBlackjackStartingHand", (object hand) =>
-        {
-            var newHand = JsonConvert.DeserializeObject<List<Card>>(hand.ToString());
-            GameInformation.Hand.AddRange(newHand);
-            StateHasChanged();
-        });
 
         _hubConnection.On("ReceiveBlackjackDealerHand", (object card) =>
         {
             var dealerCard = JsonConvert.DeserializeObject<Card>(card.ToString());
-            GameInformation.DealerHand.Add(dealerCard);
+            //GameInformation.DealerHand.Add(dealerCard);
             StateHasChanged();
         });
 
@@ -81,6 +75,7 @@ public class BlackjackGameSessionBase : ComponentBase
             StateService.CallRequestRefresh(); 
             GameInformation.Players = playerStateModel.Players;
             GameInformation.Hand = playerStateModel.HandCards ?? new List<Card>();
+            GameInformation.DealerHand = playerStateModel.DealerCards ?? new List<Card>();
             GameInformation.GameInProgress = playerStateModel.GameInProgress;
             GameInformation.Winner = null;
 
@@ -101,20 +96,32 @@ public class BlackjackGameSessionBase : ComponentBase
             StateHasChanged();
         });
 
-        _hubConnection.On("ReceiveBlackjackStand", StateHasChanged);
+        _hubConnection.On("ReceiveBlackjackStand", (object dealerHand) =>
+        {
+            var newDealerHand = JsonConvert.DeserializeObject<List<Card>>(dealerHand.ToString());
+            GameInformation.DealerHand = newDealerHand;
+            StateHasChanged();
+        });
+
 
         _hubConnection.On("ReceiveBlackjackWin", async () =>
         {
+            GameInformation.Winner = "Player";
             StateService.CallRequestRefresh();
             await Task.Delay(200);
             StateService.CallRequestRefresh();
             StateHasChanged();
         });
 
-        _hubConnection.On("ReceiveBlackjackLose", StateHasChanged);
+        _hubConnection.On("ReceiveBlackjackLose", () =>
+        {
+            GameInformation.Winner = "Dealer";
+            StateHasChanged();
+        });
 
         _hubConnection.On("ReceiveBlackjackDraw", async () =>
         {
+            GameInformation.Winner = "Draw";
             StateService.CallRequestRefresh();
             await Task.Delay(200);
             StateService.CallRequestRefresh();
