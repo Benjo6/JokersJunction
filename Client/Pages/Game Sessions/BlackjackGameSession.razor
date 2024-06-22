@@ -3,6 +3,15 @@
 
 <!-- Main Game Container -->
 <div class="poker-container">
+    <!-- Dealer's Hand -->
+    <div class="hand dealer-hand">
+        @foreach (var card in GameInformation.DealerHand)
+        {
+            <img class="card-image" src="@($"img/Cards/{card.CardNumber}{card.CardSuit}.png")" alt="@($"Card image of {card.CardNumber} of {card.CardSuit}")" />
+        }
+    </div>
+
+
     <!-- Player's Hand -->
     <div class="hand player-hand">
         @foreach (var card in GameInformation.Hand)
@@ -10,6 +19,16 @@
             <img class="card-image" src="@($"img/Cards/{card.CardNumber}{card.CardSuit}.png")" alt="@($"Card image of {card.CardNumber} of {card.CardSuit}")" />
         }
     </div>
+
+    <!-- Game Result -->
+    <div class="game-result">
+        @if (!string.IsNullOrEmpty(GameInformation.Winner))
+        {
+            <p>@GameInformation.Winner won the game!</p>
+        }
+    </div>
+
+
 
     <!-- Game Controls -->
     <div class="game-controls">
