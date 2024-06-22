@@ -73,10 +73,12 @@ public class BlackjackGameSessionBase : ComponentBase
             StateHasChanged();
         });
 
-        _hubConnection.On("ReceiveBlackjackStateRefresh", (object playerState) =>
+        _hubConnection.On("ReceiveBlackjackStateRefresh", async (object playerState) =>
         {
             var playerStateModel = JsonConvert.DeserializeObject<BlackjackPlayerStateModel>(playerState.ToString());
-
+            StateService.CallRequestRefresh();
+            await Task.Delay(200);
+            StateService.CallRequestRefresh(); 
             GameInformation.Players = playerStateModel.Players;
             GameInformation.Hand = playerStateModel.HandCards ?? new List<Card>();
             GameInformation.GameInProgress = playerStateModel.GameInProgress;
@@ -101,24 +103,21 @@ public class BlackjackGameSessionBase : ComponentBase
 
         _hubConnection.On("ReceiveBlackjackStand", StateHasChanged);
 
-        _hubConnection.On("ReceiveBlackjackWin", (object dealerHand) =>
+        _hubConnection.On("ReceiveBlackjackWin", async () =>
         {
-            var newHand = JsonConvert.DeserializeObject<List<Card>>(dealerHand.ToString());
-            GameInformation.DealerHand = newHand;
+            StateService.CallRequestRefresh();
+            await Task.Delay(200);
+            StateService.CallRequestRefresh();
             StateHasChanged();
         });
 
-        _hubConnection.On("ReceiveBlackjackLose", (object dealerHand) =>
-        {
-            var newHand = JsonConvert.DeserializeObject<List<Card>>(dealerHand.ToString());
-            GameInformation.DealerHand = newHand;
-            StateHasChanged();
-        });
+        _hubConnection.On("ReceiveBlackjackLose", StateHasChanged);
 
-        _hubConnection.On("ReceiveBlackjackDraw", (object dealerHand) =>
+        _hubConnection.On("ReceiveBlackjackDraw", async () =>
         {
-            var newHand = JsonConvert.DeserializeObject<List<Card>>(dealerHand.ToString());
-            GameInformation.DealerHand = newHand;
+            StateService.CallRequestRefresh();
+            await Task.Delay(200);
+            StateService.CallRequestRefresh();
             StateHasChanged();
         });
 
@@ -133,11 +132,8 @@ public class BlackjackGameSessionBase : ComponentBase
 
     protected async Task Start()
     {
-        // Place an automatic bet of 100
-        await _hubConnection.SendAsync("BlackjackBet", AuthState.User.Identity.Name, 100);
-
         // Deal the initial cards
-        await _hubConnection.SendAsync("DealInitialCards", AuthState.User.Identity.Name);
+        await _hubConnection.SendAsync("StartBlackjackGame", await LocalStorageService.GetItemAsync<int>("currentTable"), 100);
     }
 
     protected async Task Hit()
@@ -169,24 +165,6 @@ public class BlackjackGameSessionBase : ComponentBase
         NavigationManager.NavigateTo("/");
     }
 
-    protected async Task MarkReady()
-    {
-        var formModal = ModalService.Show<JoinTable>("Join table");
-        var result = await formModal.Result;
-        if (result.Cancelled) return;
-        await _hubConnection.SendAsync("BlackjackMarkReady", result.Data);
-        StateService.CallRequestRefresh();
-        await Task.Delay(500);
-        StateService.CallRequestRefresh();
-    }
-
-    protected async Task UnmarkReady()
-    {
-        await _hubConnection.SendAsync("BlackjackUnmarkReady");
-        StateService.CallRequestRefresh();
-        await Task.Delay(500);
-        StateService.CallRequestRefresh();
-    }
 
     protected async Task SendMessage()
     {

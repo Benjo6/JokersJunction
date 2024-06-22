@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Numerics;
 using JokersJunction.Server.Evaluators;
 using JokersJunction.Server.Models;
 using JokersJunction.Server.Repositories.Contracts;
@@ -588,43 +589,19 @@ newGame.SmallBlind * 2)
             Balance = 0
         });
 
-        BlackjackPlayerStateRefresh(tableId);
+        await BlackjackPlayerStateRefresh(tableId);
     }
-    public async Task BlackjackMarkReady(int depositAmount)
+
+    public async Task StartBlackjackGame(int tableId, int initialBet)
     {
-        if (!IsUserInGameHub(Context.User.Identity.Name)) return;
-        var tableId = GetTableByUser(Context.User.Identity.Name);
-
-        var user = Context.User.Identity.Name;
-        await Deposit(depositAmount, user);
-
-        Users.First(e => e.Name == user).IsReady = true;
-        BlackjackPlayerStateRefresh(tableId);
-
-        if (Users.Where(e => e.TableId == tableId).Count(e => e.IsReady) >= 1 && BlackjackGames.All(e => e.TableId != tableId))
-        {
-            await StartBlackjackGame(tableId);
-        }
-    }
-    public async Task BlackjackUnmarkReady()
-    {
-        if (!IsUserInGameHub(Context.User.Identity.Name)) return;
-
-        var user = Context.User.Identity.Name;
-        await Withdraw(user);
-        Users.First(e => e.Name == user).IsReady = false;
-
-        PokerPlayerStateRefresh(GetTableByUser(Context.User.Identity.Name));
-    }
-    public async Task StartBlackjackGame(int tableId)
-    {
-        var initialBet = 10; // Define initial bet amount
         var game = new BlackjackGame(tableId, initialBet);
         BlackjackGames.Add(game);
 
         // Initialize player balances and bets similar to Poker
-        foreach (var user in Users.Where(user => user.TableId == tableId && user.IsReady))
+        foreach (var user in Users.Where(user => user.TableId == tableId))
         {
+            await Deposit(initialBet, user.Name);
+
             var player = new BlackjackPlayer { Name = user.Name, RoundBet = 0 };
             player.HandCards.AddRange(game.Deck.DrawCards(2));
             game.Players.Add(player);
@@ -643,12 +620,11 @@ newGame.SmallBlind * 2)
                     user.Balance = 0;
                 }
             }
-            BlackjackPlayerStateRefresh(tableId);
+            await BlackjackPlayerStateRefresh(tableId);
 
             await Clients.Client(user.ConnectionId).SendAsync("ReceiveBlackjackStartingHand", player.HandCards);
+            await Clients.Group(tableId.ToString()).SendAsync("ReceiveBlackjackDealerHand", game.DealerHand.First());
         }
-
-        await Clients.Group(tableId.ToString()).SendAsync("ReceiveBlackjackDealerHand", game.DealerHand.First());
     }
     public async Task BlackjackHit(string playerName)
     {
@@ -669,8 +645,12 @@ newGame.SmallBlind * 2)
             {
                 await Clients.Client(Context.ConnectionId).SendAsync("ReceiveBlackjackHit", player.HandCards);
             }
+
+            // Call state refresh to check game completion
+            await BlackjackPlayerStateRefresh(game.TableId);
         }
     }
+
     public async Task BlackjackStand(string playerName)
     {
         var game = BlackjackGames.FirstOrDefault(g => g.Players.Any(p => p.Name == playerName));
@@ -681,33 +661,12 @@ newGame.SmallBlind * 2)
             player.IsStand = true;
             await Clients.Client(Context.ConnectionId).SendAsync("ReceiveBlackjackStand");
 
-            if (game.Players.All(p => p.IsStand || p.IsBust))
-            {
-                await CompleteBlackjackGame(game.TableId);
-            }
+            // Call state refresh to check game completion
+            await BlackjackPlayerStateRefresh(game.TableId);
         }
     }
-    public async Task BlackjackBet(string playerName, int betAmount)
-    {
-        var user = Users.FirstOrDefault(u => u.Name == playerName);
-        var game = BlackjackGames.FirstOrDefault(g => g.Players.Any(p => p.Name == playerName));
-        var player = game?.Players.FirstOrDefault(p => p.Name == playerName);
 
-        if (user != null && game != null && player != null && user.Balance >= betAmount)
-        {
-            user.Balance -= betAmount;
-            player.RoundBet += betAmount;
-
-            await Clients.Client(user.ConnectionId).SendAsync("ReceiveBlackjackBet", player.RoundBet);
-
-            // Check if all players have placed their bets, then proceed
-            if (game.Players.All(p => p.RoundBet > 0))
-            {
-                await Clients.Group(game.TableId.ToString()).SendAsync("ReceiveBlackjackDealerHand", game.DealerHand);
-            }
-        }
-    }
-    public void BlackjackPlayerStateRefresh(int tableId)
+    public async Task BlackjackPlayerStateRefresh(int tableId)
     {
         var playerState = new BlackjackPlayerStateModel();
 
@@ -745,14 +704,20 @@ newGame.SmallBlind * 2)
         // Send state refresh to all users based on the active blackjack game
         if (blackjackGamePlayers == null)
         {
-            Clients.Group(tableId.ToString()).SendAsync("ReceiveBlackjackStateRefresh", playerState);
+            await Clients.Group(tableId.ToString()).SendAsync("ReceiveBlackjackStateRefresh", playerState);
         }
         else
         {
             foreach (var user in Users.Where(e => e.TableId == tableId))
             {
                 playerState.HandCards = blackjackGamePlayers.FirstOrDefault(e => e.Name == user.Name)?.HandCards;
-                Clients.Client(user.ConnectionId).SendAsync("ReceiveBlackjackStateRefresh", playerState);
+                await Clients.Client(user.ConnectionId).SendAsync("ReceiveBlackjackStateRefresh", playerState);
+            }
+
+            // Check if the game should be completed
+            if (activeBlackjackGame.Players.All(p => p.IsStand || p.IsBust))
+            {
+                await CompleteBlackjackGame(activeBlackjackGame.TableId);
             }
         }
     }
@@ -771,22 +736,23 @@ newGame.SmallBlind * 2)
             {
                 if (player.IsBust || (game.GetDealerHandValue() <= 21 && game.GetDealerHandValue() > player.GetHandValue()))
                 {
-                    await Clients.Client(Users.First(u => u.Name == player.Name).ConnectionId).SendAsync("ReceiveBlackjackLose", game.DealerHand);
+                    Users.First(u => u.Name == player.Name).Balance += 0;
+                    await Clients.Client(Users.First(u => u.Name == player.Name).ConnectionId).SendAsync("ReceiveBlackjackLose");
                 }
                 else if (game.GetDealerHandValue() > 21 || player.GetHandValue() > game.GetDealerHandValue())
                 {
-                    var winAmount = player.RoundBet * 2;
-                    Users.First(u => u.Name == player.Name).Balance += winAmount;
-                    await Clients.Client(Users.First(u => u.Name == player.Name).ConnectionId).SendAsync("ReceiveBlackjackWin", game.DealerHand);
+                    Users.First(u => u.Name == player.Name).Balance += player.RoundBet * 2;
+                    await Withdraw(player.Name);
+                    await Clients.Client(Users.First(u => u.Name == player.Name).ConnectionId).SendAsync("ReceiveBlackjackWin");
                 }
                 else
                 {
-                    var pushAmount = player.RoundBet;
-                    Users.First(u => u.Name == player.Name).Balance += pushAmount;
-                    await Clients.Client(Users.First(u => u.Name == player.Name).ConnectionId).SendAsync("ReceiveBlackjackDraw", game.DealerHand);
+                    Users.First(u => u.Name == player.Name).Balance = player.RoundBet;
+                    await Withdraw(player.Name);
+                    await Clients.Client(Users.First(u => u.Name == player.Name).ConnectionId).SendAsync("ReceiveBlackjackDraw");
                 }
+                Users.First(e => e.Name == player.Name).IsReady = false;
             }
-
             BlackjackGames.Remove(game);
         }
     }
