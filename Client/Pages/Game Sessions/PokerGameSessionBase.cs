@@ -18,21 +18,24 @@ namespace JokersJunction.Client.Pages.Game_Sessions
         [Inject] public IModalService ModalService { get; set; }
         [Inject] public ILocalStorageService LocalStorageService { get; set; }
         [Inject] public NavigationManager NavigationManager { get; set; }
-
         [Inject] public IPlayerNoteService PlayerNoteService { get; set; }
-
         [Inject] public AuthenticationStateProvider AuthenticationStateProvider { get; set; }
-
         public AuthenticationState AuthState { get; set; }
 
         private HubConnection _hubConnection;
-        public PokerGameInformation GameInformation { get; set; } = new() { Players = new List<GamePlayer>() }; public string MessageInput { get; set; } = string.Empty;
+
+        public PokerGameInformation GameInformation { get; set; } = new() { Players = new List<GamePlayer>() };
+
+        public string MessageInput { get; set; } = string.Empty;
+        public bool IsChatVisible { get; private set; }
 
         public List<GetMessageResult> ChatMessages = new();
+
         protected override async Task OnInitializedAsync()
         {
             AuthState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
             var savedToken = await LocalStorageService.GetItemAsync<string>("authToken");
+
             _hubConnection = new HubConnectionBuilder()
                 .WithUrl(NavigationManager.ToAbsoluteUri("/GameHub"), options =>
                 {
@@ -40,10 +43,9 @@ namespace JokersJunction.Client.Pages.Game_Sessions
                 })
                 .Build();
 
-
             _hubConnection.On("ReceiveMessage", (object message) =>
             {
-                var newMessage = JsonConvert.DeserializeObject<GetMessageResult>(message.ToString() ?? string.Empty);
+                var newMessage = JsonConvert.DeserializeObject<GetMessageResult>(message.ToString());
                 ChatMessages.Add(newMessage);
                 StateHasChanged();
             });
@@ -51,7 +53,7 @@ namespace JokersJunction.Client.Pages.Game_Sessions
             _hubConnection.On("ReceiveStartingHand", (object hand) =>
             {
                 var newHand = JsonConvert.DeserializeObject<List<Card>>(hand.ToString());
-                GameInformation.Hand = newHand;
+                GameInformation.Hand.AddRange(newHand);
                 StateHasChanged();
             });
 
@@ -60,33 +62,26 @@ namespace JokersJunction.Client.Pages.Game_Sessions
                 GameInformation.CurrentPlayer = currentPlayer;
                 StateHasChanged();
             });
-
             _hubConnection.On("ReceiveFlop", (object flopjson) =>
             {
                 var flop = JsonConvert.DeserializeObject<List<Card>>(flopjson.ToString());
                 GameInformation.TableCards.AddRange(flop);
                 StateHasChanged();
             });
-
             _hubConnection.On("ReceiveTurnOrRiver", (object card) =>
             {
                 var turnOrRiverCard = JsonConvert.DeserializeObject<List<Card>>(card.ToString());
                 GameInformation.TableCards.AddRange(turnOrRiverCard);
                 StateHasChanged();
             });
-
-
             _hubConnection.On("ReceiveWinner", (string winner) =>
             {
                 GameInformation.Winner = winner;
                 StateHasChanged();
             });
-
-
             _hubConnection.On("ReceiveStateRefresh", (object playerState) =>
             {
                 var playerStateModel = JsonConvert.DeserializeObject<PokerPlayerStateModel>(playerState.ToString());
-
                 GameInformation.Players = playerStateModel.Players;
                 GameInformation.TableCards = playerStateModel.CommunityCards ?? new List<Card>();
                 GameInformation.Hand = playerStateModel.HandCards ?? new List<Card>();
@@ -100,12 +95,9 @@ namespace JokersJunction.Client.Pages.Game_Sessions
                         gameInformationPlayer.IsPlaying = false;
                     }
                 }
-
                 GameInformation.Winner = null;
-
                 StateHasChanged();
             });
-
             _hubConnection.On("ReceiveKick", async () =>
             {
                 await LocalStorageService.RemoveItemAsync("currentTable");
@@ -114,23 +106,19 @@ namespace JokersJunction.Client.Pages.Game_Sessions
 
             await _hubConnection.StartAsync();
 
-            var tableId = await LocalStorageService.GetItemAsync<string>("currentTable");
-            await _hubConnection.SendAsync("AddToUsers", tableId, TableType.Poker);
+            await _hubConnection.SendAsync("AddToUsersToPokerTable", await LocalStorageService.GetItemAsync<int>("currentTable"));
 
-            //GameInformation.PlayersNotes = (await PlayerNoteService.GetList(AuthState.User.Identity?.Name ?? string.Empty)).PlayerNotes;
+            //GameInformation.PlayersNotes = (await PlayerNoteService.GetList()).PlayerNotes;
 
             await base.OnInitializedAsync();
 
         }
-
         protected async Task LeaveTable()
         {
             await LocalStorageService.RemoveItemAsync("currentTable");
             await _hubConnection.StopAsync();
             NavigationManager.NavigateTo("/");
-
         }
-
         protected async Task MarkReady()
         {
             var formModal = ModalService.Show<JoinTable>("Join table");
@@ -141,7 +129,6 @@ namespace JokersJunction.Client.Pages.Game_Sessions
             await Task.Delay(500);
             StateService.CallRequestRefresh();
         }
-
         protected async Task UnmarkReady()
         {
             await _hubConnection.SendAsync("UnmarkReady");
@@ -149,17 +136,14 @@ namespace JokersJunction.Client.Pages.Game_Sessions
             await Task.Delay(500);
             StateService.CallRequestRefresh();
         }
-
         protected async Task Check()
         {
             await _hubConnection.SendAsync("ActionCheck");
         }
-
         protected async Task Fold()
         {
             await _hubConnection.SendAsync("ActionFold");
         }
-
         protected async Task Raise()
         {
             if (GameInformation.PlayerRaise > 0 &&
@@ -170,7 +154,6 @@ namespace JokersJunction.Client.Pages.Game_Sessions
             }
             GameInformation.PlayerRaise = 0;
         }
-
         protected async Task Call()
         {
             await _hubConnection.SendAsync("ActionCall");
@@ -179,7 +162,6 @@ namespace JokersJunction.Client.Pages.Game_Sessions
         {
             await _hubConnection.SendAsync("ActionAllIn");
         }
-
         protected async Task SendMessage()
         {
             if (MessageInput.Length > 0)
@@ -187,7 +169,6 @@ namespace JokersJunction.Client.Pages.Game_Sessions
                 await _hubConnection.SendAsync("SendMessage", MessageInput);
                 MessageInput = string.Empty;
             }
-
         }
         protected async Task SendOnEnter(KeyboardEventArgs e)
         {
@@ -196,5 +177,11 @@ namespace JokersJunction.Client.Pages.Game_Sessions
                 await SendMessage();
             }
         }
+
+        protected void ToggleChat()
+        {
+            IsChatVisible = !IsChatVisible;
+        }
+
     }
 }

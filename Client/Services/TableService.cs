@@ -1,22 +1,20 @@
-﻿using JokersJunction.Shared;
+﻿using JokersJunction.Server;
+using JokersJunction.Shared;
 using JokersJunction.Shared.Models;
 using System.Net.Http.Json;
-using Newtonsoft.Json;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace JokersJunction.Client.Services
 {
     public class TableService : ITableService
     {
         private readonly HttpClient _httpClient;
-
         public TableService(HttpClient httpClient)
         {
             _httpClient = httpClient;
         }
-        public async Task<CreateTableResult> Create(CreateTableModel model)
+        public async Task<CreateTableResult> CreatePoker(CreateTableModel model)
         {
-            var response = await _httpClient.PostAsJsonAsync("gateway/table", model);
+            var response = await _httpClient.PostAsJsonAsync("gateway/p-table", model);
 
             if (response.IsSuccessStatusCode)
             {
@@ -29,22 +27,49 @@ namespace JokersJunction.Client.Services
                 return null;
             }
         }
-        public async Task<List<T>> GetList<T>() where T : UiTable
+        public async Task<CreateTableResult> CreateBlackjack(CreateTableModel model)
         {
-            var result = await _httpClient.GetFromJsonAsync<List<T>>("api/table");
+            var response = await _httpClient.PostAsJsonAsync("gateway/b-table", model);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var result = await response.Content.ReadFromJsonAsync<CreateTableResult>();
+                return result;
+            }
+            else
+            {
+                // Handle error response here
+                return null;
+            }
+        }
+
+        public async Task<GetBlackjackTablesResult> GetBlackjackList()
+        {
+            var result = await _httpClient.GetFromJsonAsync<GetBlackjackTablesResult>("gateway/b-table");
             return result;
         }
 
-
-        public async Task<T> GetById<T>(int id) where T : UiTable
+        public async Task<GetPokerTablesResult> GetPokerList()
         {
-            var result = await _httpClient.GetFromJsonAsync<T>($"api/table/{id}");
+            var result = await _httpClient.GetFromJsonAsync<GetPokerTablesResult>("gateway/p-table");
             return result;
         }
 
-        public async Task<DeleteTableResult> Delete(string id)
+        public async Task<PokerTable> GetByPokerId(int id)
         {
-            var response = await _httpClient.PostAsJsonAsync($"gateway/table", id);
+            var result = await _httpClient.GetFromJsonAsync<PokerTable>($"gateway/p-table/{id}");
+            return result;
+        }
+
+        public async Task<BlackjackTable> GetByBlackjackId(int id)
+        {
+            var result = await _httpClient.GetFromJsonAsync<BlackjackTable>($"gateway/b-table/{id}");
+            return result;
+        }
+
+        public async Task<DeleteTableResult> DeletePoker(int id)
+        {
+            var response = await _httpClient.PostAsJsonAsync($"gateway/p-table/delete", id);
 
             if (response.IsSuccessStatusCode)
             {
@@ -58,15 +83,21 @@ namespace JokersJunction.Client.Services
             }
         }
 
-        private async Task<string> GetResponseContentAsync(string requestUri)
+        public async Task<DeleteTableResult> DeleteBlackjack(int id)
         {
-            var response = await _httpClient.GetAsync(requestUri);
-            if (!response.IsSuccessStatusCode)
-            {
-                throw new HttpRequestException($"Request failed with status code: {response.StatusCode}");
-            }
+            var response = await _httpClient.PostAsJsonAsync($"gateway/b-table/delete", id);
 
-            return await response.Content.ReadAsStringAsync();
+            if (response.IsSuccessStatusCode)
+            {
+                var result = await response.Content.ReadFromJsonAsync<DeleteTableResult>();
+                return result;
+            }
+            else
+            {
+                // Handle error response here
+                return null;
+            }
         }
+
     }
 }

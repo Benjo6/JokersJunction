@@ -9,16 +9,12 @@ namespace JokersJunction.Client.Components
     public class TableDeletionConfirmBase : ComponentBase
     {
         [Parameter] public PokerTable Table { get; set; }
-
         [Inject] public ITableService TableService { get; set; }
-
         [CascadingParameter] public BlazoredModalInstance BlazoredModal { get; set; }
-
-
         protected async Task DeleteConfirm()
         {
 
-            var result = await TableService.Delete(Table.Id);
+            var result = await TableService.DeletePoker(Table.Id);
 
             if (result.Successful)
             {

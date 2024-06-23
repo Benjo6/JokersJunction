@@ -5,7 +5,8 @@ namespace JokersJunction.Common.Databases.Models;
 public class Player
 {
     public string Name { get; set; }
-    public List<Card> HandCards { get; set; } = new();
+    public List<Card> HandCards { get; set; } = new List<Card>();
+
 }
 
 public class PokerPlayer : Player

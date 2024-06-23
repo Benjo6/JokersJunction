@@ -233,9 +233,9 @@
       }
     },
     {
-      "UpstreamPathTemplate": "/gateway/table/delete/{tableId}",
+      "UpstreamPathTemplate": "/gateway/p-table/delete/{tableId}",
       "UpstreamHttpMethod": [ "Get" ],
-      "DownstreamPathTemplate": "/api/table/delete/{tableId}",
+      "DownstreamPathTemplate": "/api/p-table/delete/{tableId}",
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
@@ -262,9 +262,9 @@
       }
     },
     {
-      "UpstreamPathTemplate": "/gateway/table/create",
+      "UpstreamPathTemplate": "/gateway/b-table/delete/{tableId}",
       "UpstreamHttpMethod": [ "Get" ],
-      "DownstreamPathTemplate": "/api/table/create",
+      "DownstreamPathTemplate": "/api/b-table/delete/{tableId}",
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
@@ -291,9 +291,67 @@
       }
     },
     {
-      "UpstreamPathTemplate": "/gateway/table/{id}",
+      "UpstreamPathTemplate": "/gateway/p-table/create",
       "UpstreamHttpMethod": [ "Get" ],
-      "DownstreamPathTemplate": "/api/table/{id}",
+      "DownstreamPathTemplate": "/api/p-table/create",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5001
+        }
+      ],
+      "FileCacheOptions": {
+        "TtlSeconds": 30
+      },
+      "RateLimitOptions": {
+        "ClientWhitelist": [],
+        "EnableRateLimiting": true,
+        "Period": "1s",
+        "PeriodTimespan": 1,
+        "Limit": 5
+      },
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      },
+      "RouteClaimsRequirement": {
+        "role": "Admin"
+      }
+    },
+    {
+      "UpstreamPathTemplate": "/gateway/b-table/create",
+      "UpstreamHttpMethod": [ "Get" ],
+      "DownstreamPathTemplate": "/api/b-table/create",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5001
+        }
+      ],
+      "FileCacheOptions": {
+        "TtlSeconds": 30
+      },
+      "RateLimitOptions": {
+        "ClientWhitelist": [],
+        "EnableRateLimiting": true,
+        "Period": "1s",
+        "PeriodTimespan": 1,
+        "Limit": 5
+      },
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      },
+      "RouteClaimsRequirement": {
+        "role": "Admin"
+      }
+    },
+    {
+      "UpstreamPathTemplate": "/gateway/p-table/{id}",
+      "UpstreamHttpMethod": [ "Get" ],
+      "DownstreamPathTemplate": "/api/p-table/{id}",
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
@@ -320,9 +378,67 @@
       }
     },
     {
-      "UpstreamPathTemplate": "/gateway/table",
+      "UpstreamPathTemplate": "/gateway/b-table/{id}",
       "UpstreamHttpMethod": [ "Get" ],
-      "DownstreamPathTemplate": "/api/table",
+      "DownstreamPathTemplate": "/api/b-table/{id}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5001
+        }
+      ],
+      "FileCacheOptions": {
+        "TtlSeconds": 30
+      },
+      "RateLimitOptions": {
+        "ClientWhitelist": [],
+        "EnableRateLimiting": true,
+        "Period": "1s",
+        "PeriodTimespan": 1,
+        "Limit": 5
+      },
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      },
+      "RouteClaimsRequirement": {
+        "role": "User"
+      }
+    },
+    {
+      "UpstreamPathTemplate": "/gateway/p-table",
+      "UpstreamHttpMethod": [ "Get" ],
+      "DownstreamPathTemplate": "/api/p-table",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5001
+        }
+      ],
+      "FileCacheOptions": {
+        "TtlSeconds": 30
+      },
+      "RateLimitOptions": {
+        "ClientWhitelist": [],
+        "EnableRateLimiting": true,
+        "Period": "1s",
+        "PeriodTimespan": 1,
+        "Limit": 5
+      },
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      },
+      "RouteClaimsRequirement": {
+        "role": "User"
+      }
+    },
+    {
+      "UpstreamPathTemplate": "/gateway/b-table",
+      "UpstreamHttpMethod": [ "Get" ],
+      "DownstreamPathTemplate": "/api/b-table",
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {

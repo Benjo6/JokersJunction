@@ -39,8 +39,16 @@ public class PokerTableListBase : ComponentBase
     {
         ShowError = false;
 
-        var result = await TableService.GetList<PokerTable>();
+        var result = await TableService.GetPokerList();
 
-        PokerTables = result;
+        if (result.Successful)
+        {
+            PokerTables = result.Tables;
+        }
+        else
+        {
+            ShowError = true;
+            ErrorMessage = result.Error;
+        }
     }
 }

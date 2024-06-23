@@ -70,15 +70,15 @@ public class GameService : IGameService
 
         if (activeBlackjackGame != null)
         {
-            playerState.GameInProgress = true; // assuming game is in progress if it's listed
+            playerState.GameInProgress = true;
+            playerState.DealerCards = activeBlackjackGame.DealerHand; // assuming game is in progress if it's listed
         }
-
         var blackjackGamePlayers = activeBlackjackGame?.Players;
 
         // Send state refresh to all users based on the active blackjack game
         if (blackjackGamePlayers == null)
         {
-            await _hubContext.Clients.Group(tableId).SendAsync("ReceiveBlackjackStateRefresh", playerState);
+            await _hubContext.Clients.Group(tableId.ToString()).SendAsync("ReceiveBlackjackStateRefresh", playerState);
         }
         else
         {
@@ -86,6 +86,12 @@ public class GameService : IGameService
             {
                 playerState.HandCards = blackjackGamePlayers.FirstOrDefault(e => e.Name == user.Name)?.HandCards;
                 await _hubContext.Clients.Client(user.ConnectionId).SendAsync("ReceiveBlackjackStateRefresh", playerState);
+            }
+
+            // Check if the game should be completed
+            if (activeBlackjackGame.Players.All(p => p.IsStand || p.IsBust))
+            {
+                await CompleteBlackjackGame(activeBlackjackGame.TableId);
             }
         }
     }
@@ -359,6 +365,10 @@ public class GameService : IGameService
                 {
                     var winAmount = player.RoundBet * 2;
                     users.First(u => u.Name == player.Name).Balance += winAmount;
+                    await _publishEndpoint.Publish(new UserWithdrawEvent()
+                    {
+                        GameUser = await _databaseService.GetOneByNameAsync<User>(player.Name)
+                    });
                     await _hubContext.Clients.Client(users.First(u => u.Name == player.Name).ConnectionId)
                         .SendAsync("ReceiveBlackjackWin", game.DealerHand);
                 }
@@ -366,6 +376,10 @@ public class GameService : IGameService
                 {
                     var pushAmount = player.RoundBet;
                     users.First(u => u.Name == player.Name).Balance += pushAmount;
+                    await _publishEndpoint.Publish(new UserWithdrawEvent()
+                    {
+                        GameUser = await _databaseService.GetOneByNameAsync<User>(player.Name)
+                    });
                     await _hubContext.Clients.Client(users.First(u => u.Name == player.Name).ConnectionId)
                         .SendAsync("ReceiveBlackjackDraw", game.DealerHand);
                 }

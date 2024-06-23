@@ -1,198 +1,401 @@
 ﻿@inherits PokerGameSessionBase
+
 @attribute [Authorize(Roles = "User")]
+
 @page "/Poker-Game"
 
+
+
+
 @if (GameInformation == null)
+
 {
+
     <div class="spinner"></div>
+
 }
+
 else
+
 {
-    <div class="container">
-        <div class="row">
-            <div class="col-md-9">
-                <div class="row">
-                    <div class="col-md-3 border border-dark">
-                        @if (GameInformation.Players.FirstOrDefault(e => e.SeatNumber == 2) != null)
-                        {
-                            <SessionPlayerInfo GameInformation="@GameInformation" GamePlayer="@GameInformation.Players.FirstOrDefault(e => e.SeatNumber == 2)" />
-                        }
-                        else
-                        {
-                            <p>Empty seat</p>
-                        }
-                    </div>
-                    <div class="col-md-5  border border-dark">
-                        @if (GameInformation.Players.FirstOrDefault(e => e.SeatNumber == 3) != null)
-                        {
-                            <SessionPlayerInfo GameInformation="@GameInformation" GamePlayer="@GameInformation.Players.FirstOrDefault(e => e.SeatNumber == 3)" />
-                        }
-                        else
-                        {
-                            <p>Empty seat</p>
-                        }
-                    </div>
-                    <div class="col-md-3  border border-dark">
-                        @if (GameInformation.Players.FirstOrDefault(e => e.SeatNumber == 4) != null)
-                        {
-                            <SessionPlayerInfo GameInformation="@GameInformation" GamePlayer="@GameInformation.Players.FirstOrDefault(e => e.SeatNumber == 4)" />
-                        }
-                        else
-                        {
-                            <p>Empty seat</p>
-                        }
-                    </div>
+
+    <section class="container-fluid centered-container">
+
+        <div class="poker-table">
+
+            <!-- Player seats -->
+            @for (int i = 0; i < 4; i++) // Changed from 6 to 4 for a 4-player game
+
+            {
+
+                <div class="seat">
+
+                    @if (GameInformation.Players.Count() > i && GameInformation.Players[i] != null)
+
+                    {
+
+                        <SessionPlayerInfo GameInformation="@GameInformation" GamePlayer="@GameInformation.Players[i]" />
+
+                    }
+
+                    else
+
+                    {
+
+                        <p>Empty seat</p>
+
+                    }
+
                 </div>
-                <div class="row">
-                    <div class="col-md-3">
-                        <div class="row">
-                            <div class="col-md-12  border border-dark">
-                                @if (GameInformation.Players.FirstOrDefault(e => e.SeatNumber == 1) != null)
-                                {
-                                    <SessionPlayerInfo GameInformation="@GameInformation" GamePlayer="@GameInformation.Players.FirstOrDefault(e => e.SeatNumber == 1)" />
-                                }
-                                else
-                                {
-                                    <p>Empty seat</p>
-                                }
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-12  border border-dark">
-                                @if (GameInformation.Players.FirstOrDefault(e => e.SeatNumber == 0) != null)
-                                {
-                                    <SessionPlayerInfo GameInformation="@GameInformation" GamePlayer="@GameInformation.Players.FirstOrDefault(e => e.SeatNumber == 0)" />
-                                }
-                                else
-                                {
-                                    <p>Empty seat</p>
-                                }
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-5  border border-dark">
-                        @if (!string.IsNullOrEmpty(GameInformation.Winner))
+
+            }
+
+
+
+
+            <!-- Central table area -->
+
+            <div class="table-center">
+
+                @if (GameInformation.GameInProgress && GameInformation.TableCards.Count > 0)
+
+                {
+
+                    <div class="community-cards">
+
+                        @foreach (var card in GameInformation.TableCards)
+
                         {
-                            <p>@GameInformation.Winner</p>
+
+                            <img style="height: 100px; width: auto" src="img/Cards/@string.Join("",card.CardNumber.ToString(),card.CardSuit.ToString(),".png")" alt="Card image" />
+
                         }
-                        @if (GameInformation.GameInProgress && GameInformation.TableCards.Count > 0)
+
+                        <br>
+
+                        @if (GameInformation.Pots.Any())
+
                         {
-                            foreach (var card in GameInformation.TableCards)
+
+                            @foreach (var pot in GameInformation.Pots)
+
                             {
-                                <img style="height: 100px; width: auto" src="img/Cards/@string.Join("",card.CardNumber.ToString(),card.CardSuit.ToString(),".png")" alt="Error" />
-                            }
-                            if (GameInformation.Pots.Any())
-                            {
-                                foreach (var pot in GameInformation.Pots)
+
+                                if (string.IsNullOrEmpty(pot.Winner))
+
                                 {
-                                    if (string.IsNullOrEmpty(pot.Winner))
-                                    {
-                                        <p>@pot.PotAmount</p>
-                                    }
-                                    else
-                                    {
-                                        <p>@pot.Winner won @pot.PotAmount</p>
-                                    }
-                                }
-                            }
-                        }
-                    </div>
-                    <div class="col-md-3">
-                        <div class="row">
-                            <div class="col-md-12  border border-dark">
-                                @if (GameInformation.Players.FirstOrDefault(e => e.SeatNumber == 5) != null)
-                                {
-                                    <SessionPlayerInfo GameInformation="@GameInformation" GamePlayer="@GameInformation.Players.FirstOrDefault(e => e.SeatNumber == 5)" />
-                                }
-                                else
-                                {
-                                    <p>Empty seat</p>
-                                }
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-12  border border-dark">
-                                @if (GameInformation.Players.FirstOrDefault(e => e.SeatNumber == 6) != null)
-                                {
-                                    <SessionPlayerInfo GameInformation="@GameInformation" GamePlayer="@GameInformation.Players.FirstOrDefault(e => e.SeatNumber == 6)" />
-                                }
-                                else
-                                {
-                                    <p>Empty seat</p>
-                                }
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-4  border border-dark">
-                        <button @onclick="@LeaveTable" class="btn btn-danger m-1">Leave table</button>
-                        @if (GameInformation.Players.FirstOrDefault(e => e.Username == AuthState.User.Identity.Name) != null &&
-                       !GameInformation.Players.First(e => e.Username == AuthState.User.Identity.Name).IsReady)
-                        {
-                            <button @onclick="@MarkReady" class="btn btn-primary m-1">Join game</button>
-                        }
-                        else
-                        {
-                            <button @onclick="@UnmarkReady" class="btn btn-primary m-1">Leave game</button>
-                        }
-                    </div>
-                    <div class="col-md-3  border border-dark">
-                        @if (GameInformation.Players.FirstOrDefault(e => e.SeatNumber == 7) != null)
-                        {
-                            <SessionPlayerInfo GameInformation="@GameInformation" GamePlayer="@GameInformation.Players.FirstOrDefault(e => e.SeatNumber == 7)" />
-                        }
-                        else
-                        {
-                            <p>Empty seat</p>
-                        }
-                    </div>
-                    <div class="col-md-5  border border-dark">
-                        @if (GameInformation.GameInProgress && GameInformation.CurrentPlayer == AuthState.User.Identity.Name)
-                        {
-                            <div class="row">
-                                @if (GameInformation.RaiseAmount > 0)
-                                {
-                                    <button @onclick="@Call" class="btn btn-primary m-1">Call</button>
-                                }
-                                else
-                                {
-                                    <button @onclick="@Check" class="btn btn-primary m-1">Check</button>
+
+                                    <p>Pot Amount: @pot.PotAmount</p>
 
                                 }
-                                <button @onclick="@Fold" class="btn btn-primary m-1">Fold</button>
-                            </div>
-                            <div class="row">
-                                <input @bind="@GameInformation.PlayerRaise" type="number" class="form-control col-md-4">
-                                <button @onclick="@Raise" class="btn btn-primary m-1">Raise</button>
-                                <button @onclick="@AllIn" class="btn btn-primary m-1">All-In</button>
-                            </div>
+
+                                else
+
+                                {
+
+                                    <p>@pot.Winner won @pot.PotAmount</p>
+
+                                }
+
+                            }
+
                         }
+
                     </div>
-                </div>
+
+                }
+
             </div>
-            <div class="col-md-3">
-                <div class="card-header">
-                    Chat service
-                </div>
-                <div class="card-body overflow-auto" style="height: 60vh">
-                    @foreach (var message in ChatMessages)
-                    {
-                        <div>
-                            <p>@message.Sender : @message.Message</p>
-                        </div>
-                    }
-                </div>
-                <div class="card-footer">
-                    <div class="form-group">
-                        <label>
-                            Message:
-                            <input @bind="MessageInput" />
-                        </label>
-                    </div>
-                    <button class="btn btn-primary" @onclick="SendMessage">Send</button>
-                </div>
-            </div>
+
         </div>
-    </div>
+
+
+
+
+        <!-- Chat and action buttons -->
+
+        <div class="row justify-content-between fixed-bottom mb-3 mr-3">
+
+            <div class="col-6 text-left">
+
+                <button class="btn btn-secondary" type="button" @onclick="ToggleChat">Chat</button>
+
+                <div class="card chat-card" style="@($"display: {(IsChatVisible ? "block" : "none")};")">
+
+                    <div class="card-header">
+
+                        <h5 class="card-title">Chat Service</h5>
+
+                    </div>
+
+                    <div class="card-body chat-messages" style="overflow-auto; max-height: 300px;">
+
+                        @foreach (var message in ChatMessages)
+
+                        {
+
+                            <div class="message">
+
+                                <p class="message-text">@message.Sender: @message.Message</p>
+
+                            </div>
+
+                        }
+
+                    </div>
+
+                    <div class="card-footer chat-input">
+
+                        <div class="input-group">
+
+                            <input @bind="MessageInput" class="form-control inpMsg" placeholder="Type your message here" @onkeypress="SendOnEnter">
+
+                            <div class="input-group-append">
+
+                                <button class="btn btn-primary" type="button" @onclick="SendMessage">Send</button>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="col-md-6 align-content-end text-right">
+
+                <div class="action-buttons">
+
+                    @if (GameInformation.Players.FirstOrDefault(e => e.Username == AuthState.User.Identity.Name) != null &&
+
+                   !GameInformation.Players.First(e => e.Username == AuthState.User.Identity.Name).IsReady)
+
+                    {
+
+                        <button @onclick="@MarkReady" class="btn btn-primary btn-action m-1">Join game</button>
+
+                    }
+
+                    else
+
+                    {
+
+                        <button @onclick="@UnmarkReady" class="btn btn-primary btn-action m-1">Leave game</button>
+
+                    }
+
+                    <button @onclick="@LeaveTable" class="btn btn-danger btn-action m-1">Leave table</button>
+
+                    @if (GameInformation.GameInProgress && GameInformation.CurrentPlayer == AuthState.User.Identity.Name)
+
+                    {
+
+                        @if (GameInformation.RaiseAmount > 0)
+
+                        {
+
+                            <button @onclick="@Call" class="btn btn-primary btn-action m-1">Call</button>
+
+                        }
+
+                        else
+
+                        {
+
+                            <button @onclick="@Check" class="btn btn-primary btn-action m-1">Check</button>
+
+                        }
+
+                        <button @onclick="@Fold" class="btn btn-primary btn-action m-1">Fold</button>
+
+                        <input @bind="@GameInformation.PlayerRaise" type="number" class="form-control col-md-4 m-1">
+
+                        <button @onclick="@Raise" class="btn btn-primary btn-action m-1">Raise</button>
+
+                        <button @onclick="@AllIn" class="btn btn-primary btn-action m-1">All-In</button>
+
+                    }
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
 }
+
+
+
+
+
+
+
+<style>
+
+    .centered-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+    }
+
+
+
+    .poker-table {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        grid-template-rows: repeat(3, 1fr);
+        gap: 10px;
+        width: 1200px;
+        height: 1000px;
+        margin: auto;
+    }
+
+
+
+    .seat {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: #8c4e16; /* White seats */
+
+        border-radius: 10px; /* Rounded corners for the seats */
+
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+        /* Add additional styling as needed */
+    }
+
+
+
+    .table-center {
+        grid-column: 2;
+        grid-row: 2;
+        z-index: 1;
+        background-color: #116611; /* Green table color */
+
+        border-radius: 20px; /* Rounded corners for the table */
+
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+        /* Add additional styling as needed */
+    }
+
+
+
+    /* Position player seats around the table */
+
+    .seat:nth-child(1) {
+        grid-column: 2;
+        grid-row: 1;
+    }
+
+
+
+    .seat:nth-child(2) {
+        grid-column: 2;
+        grid-row: 3;
+    }
+
+
+
+    .seat:nth-child(3) {
+        grid-column: 1;
+        grid-row: 2;
+    }
+
+
+
+    .seat:nth-child(4) {
+        grid-column: 3;
+        grid-row: 2;
+    }
+
+    /* Add more seats as needed based on the number of players */
+
+
+
+    .card {
+        width: 60px;
+        height: 90px;
+        object-fit: cover;
+    }
+
+
+
+    .community-cards {
+        display: flex;
+        justify-content: space-around;
+        width: 100%;
+    }
+
+
+
+    .card {
+        width: 60px;
+        height: 90px;
+        object-fit: cover;
+    }
+
+
+
+    .chat-card {
+        width: 500px;
+        height: 350px;
+        background-color: rgba(255,255,255,0.9); /* Light background for better readability */
+
+        border: 1px solid #ccc; /* Add a subtle border */
+    }
+
+
+
+    .chat-messages {
+        flex-grow: 1;
+        overflow-y: auto; /* Enables vertical scrolling */
+
+        flex-grow: 1;
+        padding: 0 10px;
+    }
+
+
+
+    .chat-input {
+        bottom: 0;
+        position: fixed;
+        width: 500px;
+    }
+
+
+
+    .action-buttons {
+        display: flex;
+        justify-content: space-around;
+        padding: 10px;
+    }
+
+
+
+    .btn-action {
+        flex: 1; /* Equal width for all buttons */
+
+        margin: 0 5px; /* Spacing between buttons */
+    }
+
+
+
+    .winner-announcement {
+        background-color: #dff0d8; /* Light green background */
+
+        color: #3c763d; /* Dark green text */
+
+        padding: 15px;
+        margin-bottom: 20px;
+        border: 1px solid #d6e9c6; /* Light green border */
+
+        border-radius: 4px;
+        text-align: center;
+    }
+
+</style>

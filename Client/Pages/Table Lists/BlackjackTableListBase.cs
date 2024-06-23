@@ -1,8 +1,9 @@
 ﻿using JokersJunction.Client.Services;
+using JokersJunction.Server;
 using JokersJunction.Shared;
 using Microsoft.AspNetCore.Components;
 
-namespace JokersJunction.Client.Pages.Table_Lists;
+namespace JokersJunction.Client.Pages;
 
 public class BlackjackTableListBase : ComponentBase
 {
@@ -39,7 +40,16 @@ public class BlackjackTableListBase : ComponentBase
     {
         ShowError = false;
 
-        var result = await TableService.GetList<BlackjackTable>(); 
-        BlackjackTables = result;
+        var result = await TableService.GetBlackjackList();
+
+        if (result.Successful)
+        {
+            BlackjackTables = result.Tables;
+        }
+        else
+        {
+            ShowError = true;
+            ErrorMessage = result.Error;
+        }
     }
 }

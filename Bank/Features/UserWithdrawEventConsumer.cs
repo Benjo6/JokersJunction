@@ -16,7 +16,7 @@ public class UserWithdrawEventConsumer : IConsumer<UserWithdrawEvent>
 
     public async Task Consume(ConsumeContext<UserWithdrawEvent> context)
     {
-        var user = await _userManager.FindByNameAsync(context.Message.GameUser.Name);
+        var user = await _userManager.FindByNameAsync(context.Message.GameUser.Name ?? context.Message.Name);
             
         if (user != null)
         {

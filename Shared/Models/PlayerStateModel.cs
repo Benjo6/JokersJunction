@@ -16,4 +16,5 @@ public class BlackjackPlayerStateModel
     public List<GamePlayer> Players { get; set; } = new();
     public List<Card> HandCards { get; set; } = new();
     public bool GameInProgress { get; set; }
+    public List<Card> DealerCards { get; set; }
 }

@@ -11,6 +11,8 @@ namespace JokersJunction.Client.Pages
 
         protected PokerTableList PokerChildComponent;
         protected BlackjackTableList BlackjackChildComponent;
+
+
         protected async Task ShowNewTable()
         {
             var resultModal = ModalService.Show<NewTable>("Create New Table");

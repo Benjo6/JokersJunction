@@ -262,7 +262,7 @@ public class GameController : ControllerBase
     [HttpPost("start-blackjack-game/{tableId}")]
     public async Task<IActionResult> StartBlackjackGame(string tableId)
     {
-        var initialBet = 10; // Define initial bet amount
+        var initialBet = 100; // Define initial bet amount
         var game = new BlackjackGame(tableId, initialBet);
         _databaseService.InsertOne(game);
         var responseUsers = await _getUsersRequestClient.GetResponse<GetUsersEventResponse>(new GetUsersEvent());
@@ -271,7 +271,11 @@ public class GameController : ControllerBase
         // Initialize player balances and bets similar to Poker
         foreach (var user in users.Where(user => user.TableId == tableId && user.IsReady))
         {
-            var player = new BlackjackPlayer { Name = user.Name, RoundBet = 0 };
+            await _publishEndpoint.Publish(new UserDepositEvent()
+            {
+                User = user,
+                Amount = initialBet
+            }); var player = new BlackjackPlayer { Name = user.Name, RoundBet = 0 };
             player.HandCards.AddRange(game.Deck.DrawCards(2));
             game.Players.Add(player);
 
