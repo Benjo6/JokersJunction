@@ -1,9 +1,10 @@
 ﻿namespace JokersJunction.Shared;
 
-public class PokerTable
+public class BlackjackTable
 {
-    public string Id { get; set; }
+    public int Id { get; set; }
+
     public string Name { get; set; }
+
     public int MaxPlayers { get; set; }
-    public int SmallBlind { get; set; }
 }

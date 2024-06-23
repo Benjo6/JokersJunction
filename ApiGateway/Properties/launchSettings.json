@@ -9,7 +9,7 @@
     }
   },
   "profiles": {
-    "SignalR": {
+    "API Gateway": {
       "commandName": "Project",
       "dotnetRunMessages": true,
       "launchBrowser": false,

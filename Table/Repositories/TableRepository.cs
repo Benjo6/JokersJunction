@@ -1,54 +1,102 @@
-﻿using JokersJunction.Common.Databases;
-using JokersJunction.Common.Databases.Interfaces;
-using JokersJunction.Common.Databases.Models;
+﻿using JokersJunction.Server;
+using JokersJunction.Shared;
+using JokersJunction.Shared.Data;
 using JokersJunction.Table.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using MongoDB.Bson;
 
-namespace JokersJunction.Table.Repositories
+namespace JokersJunction.Table.Repositories;
+
+public class TableRepository : ITableRepository
 {
-    public class TableRepository : ITableRepository
+    private readonly AppDbContext _appDbContext;
+
+    public TableRepository(AppDbContext appDbContext)
     {
-        private readonly IDatabaseService _databaseService;
-        public TableRepository(IDatabaseService databaseService)
-        {
-            _databaseService = databaseService;
-        }
-        public async Task<List<PokerTable>> GetTables()
-        {
-            return await _databaseService.ReadAsync<PokerTable>();
-        }
+        _appDbContext = appDbContext;
+    }
 
-        public async Task<PokerTable?> GetTableById(string tableId)
-        {
-            return await _databaseService.GetOneFromIdAsync<PokerTable>(tableId);
-        }
+    public async Task<IEnumerable<PokerTable>> GetPokerTables()
+    {
+        return await _appDbContext.Set<PokerTable>().ToListAsync();
+    }
 
-        public async Task<PokerTable?> GetTableByName(string tableName)
-        {
-            return await _databaseService.GetOneByNameAsync<PokerTable>(tableName);
-        }
+    public async Task<IEnumerable<BlackjackTable>> GetBlackjackTables()
+    {
+        return await _appDbContext.Set<BlackjackTable>().ToListAsync();
+    }
 
-        public async Task<PokerTable> AddTable(PokerTable table)
-        {
-            _databaseService.InsertOne(table);
-            return await _databaseService.GetOneByNameAsync<PokerTable>(table.Name);
-        }
+    public async Task<PokerTable?> GetPokerTableById(int tableId)
+    {
+        return await _appDbContext.Set<PokerTable>().FirstOrDefaultAsync(e => e.Id == tableId);
+    }
+    public async Task<BlackjackTable?> GetBlackjackTableById(int tableId)
+    {
+        return await _appDbContext.Set<BlackjackTable>().FirstOrDefaultAsync(e => e.Id == tableId);
+    }
 
-        public async Task<PokerTable> UpdateTable(PokerTable table)
-        {
-            await _databaseService.ReplaceOneAsync(table);
-            return await _databaseService.GetOneByNameAsync<PokerTable>(table.Name);
-        }
+    public async Task<PokerTable?> GetPokerTableByName(string tableName)
+    {
+        return await _appDbContext.Set<PokerTable>().FirstOrDefaultAsync(e => e.Name == tableName);
+    }
 
-        public async Task<bool> DeleteTable(string tableId)
-        {
-            var itemToDelete = await _databaseService.GetOneFromIdAsync<PokerTable>(tableId);
-            if (itemToDelete is null)
-            {
-                return false;
-            }
-            return await _databaseService.DeleteOneAsync(itemToDelete);
-        }
+    public async Task<BlackjackTable?> GetBlackjackTableByName(string tableName)
+    {
+        return await _appDbContext.Set<BlackjackTable>().FirstOrDefaultAsync(e => e.Name == tableName);
+    }
+
+    public async Task<PokerTable> AddPokerTable(PokerTable table)
+    {
+        var result = await _appDbContext.Set<PokerTable>().AddAsync(table);
+        await _appDbContext.SaveChangesAsync();
+        return result.Entity;
+    }
+    public async Task<BlackjackTable> AddBlackjackTable(BlackjackTable table)
+    {
+        var result = await _appDbContext.Set<BlackjackTable>().AddAsync(table);
+        await _appDbContext.SaveChangesAsync();
+        return result.Entity;
+    }
+
+    public async Task<PokerTable> UpdatePokerTable(PokerTable table)
+    {
+        var result = await _appDbContext.Set<PokerTable>().FirstOrDefaultAsync(e => e.Id == table.Id);
+
+        if (result == null) return null;
+
+        result.MaxPlayers = table.MaxPlayers;
+        result.Name = table.Name;
+        result.SmallBlind = table.SmallBlind;
+        return result;
+    }
+
+    public async Task<BlackjackTable> UpdateBlackjackTable(BlackjackTable table)
+    {
+        var result = await _appDbContext.Set<BlackjackTable>().FirstOrDefaultAsync(e => e.Id == table.Id);
+
+        if (result == null) return null;
+
+        result.MaxPlayers = table.MaxPlayers;
+        result.Name = table.Name;
+        return result;
+    }
+
+    public async Task<PokerTable> DeletePokerTable(int tableId)
+    {
+        var result = await _appDbContext.Set<PokerTable>().FirstOrDefaultAsync(e => e.Id == tableId);
+        if (result == null) return null;
+
+        _appDbContext.Set<PokerTable>().Remove(result);
+        await _appDbContext.SaveChangesAsync();
+        return result;
+    }
+
+    public async Task<BlackjackTable> DeleteBlackjackTable(int tableId)
+    {
+        var result = await _appDbContext.Set<BlackjackTable>().FirstOrDefaultAsync(e => e.Id == tableId);
+        if (result == null) return null;
+
+        _appDbContext.Set<BlackjackTable>().Remove(result);
+        await _appDbContext.SaveChangesAsync();
+        return result;
     }
 }

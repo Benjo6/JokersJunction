@@ -11,8 +11,10 @@ namespace JokersJunction.Shared.Data
         {
 
         }
-
+        public DbSet<PokerTable> PokerTables { get; set; }
         public DbSet<PlayerNote> PlayerNotes { get; set; }
+        public DbSet<BlackjackTable> BlackjackTables { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

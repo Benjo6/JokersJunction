@@ -18,7 +18,7 @@ namespace JokersJunction.Client.Components
         protected async Task DeleteConfirm()
         {
 
-            var result = await TableService.Delete(Table.Id);
+            var result = await TableService.DeletePoker(Table.Id);
 
             if (result.Successful)
             {

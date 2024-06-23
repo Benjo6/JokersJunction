@@ -32,11 +32,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\ApiGateway\JokersJunction.ApiGateway.csproj" />
     <ProjectReference Include="..\Authentication\JokersJunction.Authentication.csproj" />
     <ProjectReference Include="..\Bank\JokersJunction.Bank.csproj" />
     <ProjectReference Include="..\Client\JokersJunction.Client.csproj" />
     <ProjectReference Include="..\Common\JokersJunction.Common.csproj" />
-    <ProjectReference Include="..\JokersJunction.Bank\JokersJunction.Bank.csproj" />
     <ProjectReference Include="..\Shared\JokersJunction.Shared.csproj" />
+    <ProjectReference Include="..\Table\JokersJunction.Table.csproj" />
   </ItemGroup>
 </Project>

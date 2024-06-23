@@ -1,0 +1,74 @@
+﻿@page "/blackjack-game"
+@inherits BlackjackGameSessionBase
+
+<!-- Main Game Container -->
+<div class="poker-container">
+    <!-- Dealer's Hand -->
+    <div class="hand dealer-hand">
+        @foreach (var card in GameInformation.DealerHand)
+        {
+            <img class="card-image" src="@($"img/Cards/{card.CardNumber}{card.CardSuit}.png")" alt="@($"Card image of {card.CardNumber} of {card.CardSuit}")" />
+        }
+    </div>
+
+
+    <!-- Player's Hand -->
+    <div class="hand player-hand">
+        @foreach (var card in GameInformation.Hand)
+        {
+            <img class="card-image" src="@($"img/Cards/{card.CardNumber}{card.CardSuit}.png")" alt="@($"Card image of {card.CardNumber} of {card.CardSuit}")" />
+        }
+    </div>
+
+    <!-- Game Result -->
+    <div class="game-result">
+        @if (!string.IsNullOrEmpty(GameInformation.Winner))
+        {
+            <p>@GameInformation.Winner won the game!</p>
+        }
+    </div>
+
+
+
+    <!-- Game Controls -->
+    <div class="game-controls">
+        <button @onclick="Start" class="btn-start">Start</button>
+        <button @onclick="Hit" class="btn-hit">Hit</button>
+        <button @onclick="Stand" class="btn-stand">Stand</button>
+    </div>
+</div>
+
+<!-- Styles -->
+<style>
+    .poker-container {
+        max-width: 800px;
+        margin: auto;
+        padding: 20px;
+        text-align: center;
+    }
+
+    .hand {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 20px;
+    }
+
+    .card-image {
+        height: 100px;
+        width: auto;
+        margin: 5px;
+    }
+
+    .game-controls {
+        margin-bottom: 20px;
+    }
+
+    .btn-start, .btn-hit, .btn-stand {
+        padding: 10px 20px;
+        margin-right: 10px;
+        border: none;
+        background-color: #333;
+        color: white;
+        cursor: pointer;
+    }
+</style>

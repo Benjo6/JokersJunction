@@ -1,7 +1,11 @@
 using JokersJunction.Common.Databases;
 using JokersJunction.Common.Databases.Interfaces;
+using JokersJunction.Shared.Data;
+using JokersJunction.Shared.Models;
 using JokersJunction.Table.Repositories;
 using JokersJunction.Table.Repositories.Interfaces;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,8 +13,16 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddRouting(options => options.LowercaseUrls = true);
-//builder.Services.AddAutoMapper(typeof(Program));
-builder.Services.AddScoped<IDatabaseService>(sp => new DatabaseService(builder.Configuration.GetConnectionString("MongoConnection")));
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DBConnection")));
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+    {
+        options.Password.RequiredLength = 10;
+        options.Password.RequiredUniqueChars = 3;
+        options.Password.RequireNonAlphanumeric = false;
+    })
+    .AddRoles<IdentityRole>()
+    .AddEntityFrameworkStores<AppDbContext>();
 
 builder.Services.AddScoped<ITableRepository, TableRepository>();
 

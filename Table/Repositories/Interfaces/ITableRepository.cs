@@ -1,19 +1,22 @@
-﻿using JokersJunction.Common.Databases.Models;
-using MongoDB.Bson;
+﻿using JokersJunction.Server;
+using JokersJunction.Shared;
 
 namespace JokersJunction.Table.Repositories.Interfaces
 {
     public interface ITableRepository
     {
-        public Task<List<PokerTable>> GetTables();
+        public Task<IEnumerable<PokerTable>> GetPokerTables();
+        public Task<IEnumerable<BlackjackTable>> GetBlackjackTables();
+        public Task<PokerTable?> GetPokerTableById(int tableId);
+        public Task<BlackjackTable?> GetBlackjackTableById(int tableId);
+        public Task<PokerTable?> GetPokerTableByName(string tableName);
+        public Task<BlackjackTable?> GetBlackjackTableByName(string tableName);
+        public Task<PokerTable> AddPokerTable(PokerTable table);
+        public Task<BlackjackTable> AddBlackjackTable(BlackjackTable table);
+        public Task<PokerTable> UpdatePokerTable(PokerTable table);
+        public Task<BlackjackTable> UpdateBlackjackTable(BlackjackTable table);
+        public Task<PokerTable> DeletePokerTable(int tableId);
+        public Task<BlackjackTable> DeleteBlackjackTable(int tableId);
 
-        public Task<PokerTable> GetTableById(string tableId);
-        public Task<PokerTable?> GetTableByName(string tableName);
-
-        public Task<PokerTable> AddTable(PokerTable table);
-
-        public Task<PokerTable> UpdateTable(PokerTable table);
-
-        public Task<bool> DeleteTable(string tableId);
     }
 }

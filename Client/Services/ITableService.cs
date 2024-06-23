@@ -1,16 +1,23 @@
-﻿using JokersJunction.Shared;
+﻿using JokersJunction.Server;
+using JokersJunction.Shared;
 using JokersJunction.Shared.Models;
 
 namespace JokersJunction.Client.Services
 {
     public interface ITableService
     {
-        Task<CreateTableResult> Create(CreateTableModel model);
+        Task<CreateTableResult> CreatePoker(CreateTableModel model);
 
-        Task<List<PokerTable>> GetList();
+        Task<CreateTableResult> CreateBlackjack(CreateTableModel model);
 
-        Task<PokerTable> GetById(string id);
+        Task<GetBlackjackTablesResult> GetBlackjackList();
 
-        Task<DeleteTableResult> Delete(string id);
+        Task<GetPokerTablesResult> GetPokerList();
+
+        Task<PokerTable> GetByPokerId(int id);
+        Task<BlackjackTable> GetByBlackjackId(int id);
+
+        Task<DeleteTableResult> DeletePoker(int id);
+        Task<DeleteTableResult> DeleteBlackjack(int id);
     }
 }

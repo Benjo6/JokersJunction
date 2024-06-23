@@ -1,4 +1,4 @@
-using AutoMapper;
+using JokersJunction.Server;
 using JokersJunction.Shared;
 using JokersJunction.Shared.Models;
 using JokersJunction.Table.Repositories.Interfaces;
@@ -7,119 +7,224 @@ using MongoDB.Bson;
 
 namespace JokersJunction.Table.Controllers;
 
-[Route("api/[controller]")]
+[Route("api/")]
 [ApiController]
 public class TableController : ControllerBase
 {
     private readonly ITableRepository _tableRepository;
-    private readonly ILogger<TableController> _logger;
 
-    public TableController(ITableRepository tableRepository, ILogger<TableController> logger)
+    public TableController(ITableRepository tableRepository)
     {
         _tableRepository = tableRepository;
-        _logger = logger;
     }
 
-    [HttpGet]
-    public async Task<IActionResult> GetTables()
+    [HttpGet("p-table")]
+    public async Task<ActionResult<GetPokerTablesResult>> GetPokerTables()
     {
         try
         {
-            var pokerTables = await _tableRepository.GetTables();
-            var mappedPokerTables = pokerTables.Select(pt => new PokerTable
+            return (new GetPokerTablesResult
             {
-                Id = pt.Id.ToString(),
-                Name = pt.Name,
-                MaxPlayers = pt.MaxPlayers,
-                SmallBlind = pt.SmallBlind
-            }).ToList();
-
-            return Ok(mappedPokerTables);
+                Successful = true,
+                Tables = await _tableRepository.GetPokerTables()
+            });
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            _logger.LogError(ex, "Error fetching poker tables.");
-            return BadRequest();
-        }
-    }
-
-    //[Authorize(Roles = "Admin")]
-    [HttpPost("Create")]
-    public async Task<IActionResult> Create([FromBody] CreateTableModel? request)
-    {
-        try
-        {
-            if (request == null)
-            {
-                return NotFound(new CreateTableResult
-                {
-                    Successful = false,
-                    Errors = new List<string> { "Invalid table model" }
-                });
-            }
-
-            var existingTable = await _tableRepository.GetTableByName(request.Name);
-            if (existingTable != null)
-            {
-                return Ok(new CreateTableResult
-                {
-                    Successful = false,
-                    Errors = new List<string> { "Table with this name already exists" }
-                });
-            }
-
-            var newTable = new Common.Databases.Models.PokerTable
-            {
-                Name = request.Name,
-                MaxPlayers = request.MaxPlayers,
-                SmallBlind = request.SmallBlind
-            };
-
-            await _tableRepository.AddTable(newTable);
-
-            return Ok(new CreateTableResult { Successful = true });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error creating poker table.");
-            return BadRequest(new CreateTableResult()
+            return (new GetPokerTablesResult
             {
                 Successful = false,
-                Errors = new List<string> { "Unexpected error occurred. Try again or contact support" }
+                Error = "Error processing request"
             });
         }
     }
 
-
-    [HttpGet("{id}")]
-    public async Task<IActionResult> GetTableById(string id)
+    [HttpGet("b-table")]
+    public async Task<ActionResult<GetBlackjackTablesResult>> GetBlackjackTables()
     {
         try
         {
-            var table = await _tableRepository.GetTableById(id);
-
-            return Ok(table);
+            return (new GetBlackjackTablesResult
+            {
+                Successful = true,
+                Tables = await _tableRepository.GetBlackjackTables()
+            });
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            _logger.LogError(ex, $"Error fetching poker table with ID {id}.");
-            return NotFound();
+            return (new GetBlackjackTablesResult
+            {
+                Successful = false,
+                Error = "Error processing request"
+            });
         }
     }
 
     //[Authorize(Roles = "Admin")]
-    [HttpDelete("delete/{tableId}")]
-    public async Task<IActionResult> DeleteTable(string tableId)
+    [HttpPost("p-table")]
+    public async Task<ActionResult<CreateTableResult>> CreatePoker([FromBody] CreateTableModel model)
     {
         try
         {
-            await _tableRepository.DeleteTable(tableId);
-            return Ok(new DeleteTableResult { Successful = true });
+            if (model == null)
+            {
+                return new CreateTableResult
+                {
+                    Successful = false,
+                    Errors = new List<string>() { "Invalid table model" }
+                };
+            }
+
+            var table = await _tableRepository.GetPokerTableByName(model.Name);
+
+            if (table != null)
+            {
+                return Ok(new CreateTableResult
+                {
+                    Successful = false,
+                    Errors = new List<string>() { "Table with this name already exists" }
+                });
+            }
+
+            await _tableRepository.AddPokerTable(new PokerTable()
+            {
+                MaxPlayers = model.MaxPlayers,
+                Name = model.Name,
+                SmallBlind = model.SmallBlind
+            });
+
+            return Ok(new CreateTableResult
+            {
+                Successful = true
+            });
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            _logger.LogError(ex, $"Error deleting poker table with ID {tableId}.");
-            return BadRequest(new DeleteTableResult { Successful = false, Error = "Error processing request" });
+            return new CreateTableResult
+            {
+                Successful = false,
+                Errors = new List<string>() { "Unexpected error occured. Try again or contact support" }
+            };
         }
     }
+
+    [HttpPost("b-table")]
+    public async Task<ActionResult<CreateTableResult>> CreateBlackjack([FromBody] CreateTableModel model)
+    {
+        try
+        {
+            if (model == null)
+            {
+                return new CreateTableResult
+                {
+                    Successful = false,
+                    Errors = new List<string>() { "Invalid table model" }
+                };
+            }
+
+            var table = await _tableRepository.GetBlackjackTableByName(model.Name);
+
+            if (table != null)
+            {
+                return Ok(new CreateTableResult
+                {
+                    Successful = false,
+                    Errors = new List<string>() { "Table with this name already exists" }
+                });
+            }
+
+            await _tableRepository.AddBlackjackTable(new BlackjackTable()
+            {
+                MaxPlayers = model.MaxPlayers,
+                Name = model.Name
+            });
+
+            return Ok(new CreateTableResult
+            {
+                Successful = true
+            });
+        }
+        catch (Exception)
+        {
+            return new CreateTableResult
+            {
+                Successful = false,
+                Errors = new List<string>() { "Unexpected error occured. Try again or contact support" }
+            };
+        }
+    }
+
+    [HttpGet("p-table/{id:int}")]
+    public async Task<ActionResult<PokerTable>> GetPokerTableById(int id)
+    {
+        try
+        {
+            return await _tableRepository.GetPokerTableById(id) ?? throw new InvalidOperationException();
+        }
+        catch (Exception)
+        {
+            return NotFound();
+            // ignored
+        }
+    }
+
+    [HttpGet("b-table/{id:int}")]
+    public async Task<ActionResult<BlackjackTable>> GetBlackjackTableById(int id)
+    {
+        try
+        {
+            return await _tableRepository.GetBlackjackTableById(id) ?? throw new InvalidOperationException();
+        }
+        catch (Exception)
+        {
+            return NotFound();
+            // ignored
+        }
+    }
+
+    //[Authorize(Roles = "Admin")]
+    [HttpPost("p-table/delete")]
+    public async Task<ActionResult<DeleteTableResult>> DeletePokerTable([FromBody] int tableId)
+    {
+        try
+        {
+            await _tableRepository.DeletePokerTable(tableId);
+            return (new DeleteTableResult
+            {
+                Successful = true
+            });
+
+        }
+        catch (Exception)
+        {
+            return (new DeleteTableResult
+            {
+                Successful = false,
+                Error = "Error processing request"
+            });
+        }
+    }
+
+    [HttpPost("´b-table/delete")]
+    public async Task<ActionResult<DeleteTableResult>> DeleteBlackjackTable([FromBody] int tableId)
+    {
+        try
+        {
+            await _tableRepository.DeleteBlackjackTable(tableId);
+            return (new DeleteTableResult
+            {
+                Successful = true
+            });
+
+        }
+        catch (Exception)
+        {
+            return (new DeleteTableResult
+            {
+                Successful = false,
+                Error = "Error processing request"
+            });
+        }
+    }
+
 }

@@ -2,17 +2,17 @@
 using Blazored.Modal.Services;
 using JokersJunction.Client.Components;
 using JokersJunction.Client.Services;
-using JokersJunction.Shared.Models;
 using JokersJunction.Shared;
+using JokersJunction.Shared.Models;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.SignalR.Client;
 using Newtonsoft.Json;
-using Microsoft.AspNetCore.Components.Web;
 
-namespace JokersJunction.Client.Pages
+namespace JokersJunction.Client.Pages.Game_Sessions
 {
-    public class GameSessionBase : ComponentBase
+    public class PokerGameSessionBase : ComponentBase
     {
         [Inject] public IStateService StateService { get; set; }
         [Inject] public IModalService ModalService { get; set; }
@@ -26,8 +26,11 @@ namespace JokersJunction.Client.Pages
         public AuthenticationState AuthState { get; set; }
 
         private HubConnection _hubConnection;
-        public GameInformation GameInformation { get; set; } = new() { Players = new List<GamePlayer>() };
+
+        public PokerGameInformation GameInformation { get; set; } = new() { Players = new List<GamePlayer>() };
+
         public string MessageInput { get; set; } = string.Empty;
+        public bool IsChatVisible { get; private set; }
 
         public List<GetMessageResult> ChatMessages = new();
 
@@ -35,6 +38,7 @@ namespace JokersJunction.Client.Pages
         {
             AuthState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
             var savedToken = await LocalStorageService.GetItemAsync<string>("authToken");
+
             _hubConnection = new HubConnectionBuilder()
                 .WithUrl(NavigationManager.ToAbsoluteUri("/GameHub"), options =>
                 {
@@ -42,10 +46,9 @@ namespace JokersJunction.Client.Pages
                 })
                 .Build();
 
-
             _hubConnection.On("ReceiveMessage", (object message) =>
             {
-                var newMessage = JsonConvert.DeserializeObject<GetMessageResult>(message.ToString() ?? string.Empty);
+                var newMessage = JsonConvert.DeserializeObject<GetMessageResult>(message.ToString());
                 ChatMessages.Add(newMessage);
                 StateHasChanged();
             });
@@ -53,7 +56,7 @@ namespace JokersJunction.Client.Pages
             _hubConnection.On("ReceiveStartingHand", (object hand) =>
             {
                 var newHand = JsonConvert.DeserializeObject<List<Card>>(hand.ToString());
-                GameInformation.Hand = newHand;
+                GameInformation.Hand.AddRange(newHand);
                 StateHasChanged();
             });
 
@@ -116,10 +119,9 @@ namespace JokersJunction.Client.Pages
 
             await _hubConnection.StartAsync();
 
-            var tableId = await LocalStorageService.GetItemAsync<string>("currentTable");
-            await _hubConnection.SendAsync("AddToUsers", tableId);
+            await _hubConnection.SendAsync("AddToUsersToPokerTable", await LocalStorageService.GetItemAsync<int>("currentTable"));
 
-            //GameInformation.PlayersNotes = (await PlayerNoteService.GetList(AuthState.User.Identity?.Name ?? string.Empty)).PlayerNotes;
+            //GameInformation.PlayersNotes = (await PlayerNoteService.GetList()).PlayerNotes;
 
             await base.OnInitializedAsync();
 
@@ -198,5 +200,11 @@ namespace JokersJunction.Client.Pages
                 await SendMessage();
             }
         }
+
+        protected void ToggleChat()
+        {
+            IsChatVisible = !IsChatVisible;
+        }
+
     }
 }
