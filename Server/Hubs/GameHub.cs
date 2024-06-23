@@ -99,12 +99,6 @@ public class GameHub : Hub
             return;
         }
 
-        if (Users.Any(e => e.Name == Context.User.Identity.Name))
-        {
-            await Clients.Client(Context.ConnectionId).SendAsync("ReceiveKick");
-            return;
-        }
-
         await Groups.AddToGroupAsync(Context.ConnectionId, tableId.ToString());
 
         var newSeatNumber = AssignTableToUser(tableId);
