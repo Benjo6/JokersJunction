@@ -348,7 +348,14 @@ public class GameService : IGameService
         {
             while (game.GetDealerHandValue() < 17)
             {
-                game.DealerHand.Add(game.Deck.DrawCards(1).First());
+                foreach (var player in game.Players)
+                {
+                    if (player.GetHandValue() >= game.GetDealerHandValue())
+                    {
+                        game.DealerHand.Add(game.Deck.DrawCards(1).First());
+                        await BlackjackPlayerStateRefresh(tableId);
+                    }
+                }
             }
 
             var responseUser = await _getUsersRequestClient.GetResponse<GetUsersEventResponse>(new GetUsersEvent());

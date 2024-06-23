@@ -39,7 +39,7 @@ public class BlackjackPlayer : Player
             }
             else
             {
-                value += (int)card.CardNumber;
+                value += (int)card.CardNumber + 1;
             }
         }
 
