@@ -35,7 +35,7 @@ public class BlackjackGame : Game
             }
             else
             {
-                value += (int)card.CardNumber;
+                value += (int)card.CardNumber + 1;
             }
         }
 
