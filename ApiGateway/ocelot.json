@@ -100,7 +100,7 @@
       "UpstreamPathTemplate": "/gateway/p-table/{id}",
       "UpstreamHttpMethod": [ "Get" ],
       "DownstreamPathTemplate": "/api/p-table/{id}",
-      "DownstreamScheme": "https",
+      "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
           "Host": "table",
@@ -150,7 +150,7 @@
       "UpstreamPathTemplate": "/gateway/currency/balance/{userName}",
       "UpstreamHttpMethod": [ "Get" ],
       "DownstreamPathTemplate": "/api/currency/balance/{userName}",
-      "DownstreamScheme": "https",
+      "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
           "Host": "bank",

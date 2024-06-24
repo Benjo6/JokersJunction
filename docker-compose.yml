@@ -1,5 +1,13 @@
 version: '3.8'
 services:
+  ch-database:
+    image: postgres
+    environment:
+      POSTGRES_PASSWORD: mysecretpassword
+    ports:
+      - 5434:5432
+    networks:
+      - mynetwork
   apigateway:
     build: 
       context: .
