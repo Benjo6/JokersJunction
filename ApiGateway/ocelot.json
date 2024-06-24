@@ -7,8 +7,8 @@
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
-          "Port": 7123
+          "Host": "game-user",
+          "Port": 80
         }
       ],
       "FileCacheOptions": {
@@ -36,8 +36,8 @@
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
-          "Port": 7123
+          "Host": "game",
+          "Port": 80
         }
       ],
       "FileCacheOptions": {
@@ -65,8 +65,8 @@
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
-          "Port": 7265
+          "Host": "game-user",
+          "Port": 80
         }
       ],
       "FileCacheOptions": {
@@ -94,8 +94,8 @@
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
-          "Port": 7265
+          "Host": "game-user",
+          "Port": 80
         }
       ],
       "FileCacheOptions": {
@@ -123,8 +123,8 @@
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
-          "Port": 5002
+          "Host": "player-note",
+          "Port": 80
         }
       ],
       "FileCacheOptions": {
@@ -152,8 +152,8 @@
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
-          "Port": 5002
+          "Host": "player-note",
+          "Port": 80
         }
       ],
       "FileCacheOptions": {
@@ -181,8 +181,8 @@
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
-          "Port": 5002
+          "Host": "player-note",
+          "Port": 80
         }
       ],
       "FileCacheOptions": {
@@ -210,8 +210,8 @@
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
-          "Port": 5002
+          "Host": "player-note",
+          "Port": 80
         }
       ],
       "FileCacheOptions": {
@@ -239,8 +239,8 @@
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
-          "Port": 5001
+          "Host": "table",
+          "Port": 80
         }
       ],
       "FileCacheOptions": {
@@ -268,8 +268,8 @@
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
-          "Port": 5001
+          "Host": "table",
+          "Port": 80
         }
       ],
       "FileCacheOptions": {
@@ -297,8 +297,8 @@
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
-          "Port": 5001
+          "Host": "table",
+          "Port": 80
         }
       ],
       "FileCacheOptions": {
@@ -326,8 +326,8 @@
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
-          "Port": 5001
+          "Host": "table",
+          "Port": 80
         }
       ],
       "FileCacheOptions": {
@@ -355,8 +355,8 @@
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
-          "Port": 5001
+          "Host": "table",
+          "Port": 80
         }
       ],
       "FileCacheOptions": {
@@ -384,8 +384,8 @@
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
-          "Port": 5001
+          "Host": "table",
+          "Port": 80
         }
       ],
       "FileCacheOptions": {
@@ -413,8 +413,8 @@
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
-          "Port": 5001
+          "Host": "table",
+          "Port": 80
         }
       ],
       "FileCacheOptions": {
@@ -442,8 +442,8 @@
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
-          "Port": 5001
+          "Host": "table",
+          "Port": 80
         }
       ],
       "FileCacheOptions": {
@@ -471,8 +471,8 @@
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
-          "Port": 7158
+          "Host": "bank",
+          "Port": 80
         }
       ],
       "FileCacheOptions": {
@@ -500,8 +500,8 @@
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
-          "Port": 7158
+          "Host": "bank",
+          "Port": 80
         }
       ],
       "FileCacheOptions": {
@@ -529,8 +529,8 @@
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
-          "Port": 7158
+          "Host": "bank",
+          "Port": 80
         }
       ],
       "FileCacheOptions": {
@@ -558,8 +558,8 @@
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
-          "Port": 7017
+          "Host": "authentication",
+          "Port": 80
         }
       ],
       "FileCacheOptions": {
@@ -587,8 +587,8 @@
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
-          "Port": 7017
+          "Host": "autentication",
+          "Port": 80
         }
       ],
       "FileCacheOptions": {
@@ -616,8 +616,8 @@
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
-          "Port": 7265
+          "Host": "game",
+          "Port": 80
         }
       ],
       "FileCacheOptions": {
@@ -645,8 +645,8 @@
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
-          "Port": 7265
+          "Host": "game",
+          "Port": 80
         }
       ],
       "FileCacheOptions": {
@@ -674,8 +674,8 @@
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
-          "Port": 7265
+          "Host": "game",
+          "Port": 80
         }
       ],
       "FileCacheOptions": {
@@ -703,8 +703,8 @@
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
-          "Port": 7265
+          "Host": "game",
+          "Port": 80
         }
       ],
       "FileCacheOptions": {
@@ -732,8 +732,8 @@
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
-          "Port": 7265
+          "Host": "game",
+          "Port": 80
         }
       ],
       "FileCacheOptions": {
@@ -761,8 +761,8 @@
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
-          "Port": 7265
+          "Host": "game",
+          "Port": 80
         }
       ],
       "FileCacheOptions": {
@@ -790,8 +790,8 @@
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
-          "Port": 7265
+          "Host": "game",
+          "Port": 80
         }
       ],
       "FileCacheOptions": {
@@ -819,8 +819,8 @@
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
-          "Port": 7265
+          "Host": "game",
+          "Port": 80
         }
       ],
       "FileCacheOptions": {
@@ -848,8 +848,8 @@
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
-          "Port": 7265
+          "Host": "game",
+          "Port": 80
         }
       ],
       "FileCacheOptions": {
