@@ -1,0 +1,87 @@
+version: '3.8'
+services:
+  apigateway:
+    build: 
+      context: .
+      dockerfile: ./ApiGateway/Dockerfile
+    ports:
+      - 2000:80
+    networks:
+      - mynetwork
+    deploy:
+      replicas: 3
+
+  authentication:
+    build: 
+      context: .
+      dockerfile: ./Authentication/Dockerfile
+    ports:
+      - 7017:80
+    networks:
+      - mynetwork
+
+  bank:
+    build: 
+      context: .
+      dockerfile: ./Bank/Dockerfile
+    ports:
+      - 7158:80
+    networks:
+      - mynetwork
+
+  game:
+    build: 
+      context: .
+      dockerfile: ./GameManagement/Dockerfile
+    ports:
+      - 7123:80
+    networks:
+      - mynetwork
+
+  game-user:
+    build: 
+      context: .
+      dockerfile: ./JokersJunction.MatchMaker/Dockerfile
+    ports:
+      - 7265:80
+    networks:
+      - mynetwork
+  table:
+    build: 
+      context: .
+      dockerfile: ./Table/Dockerfile
+    ports:
+      - 5001:80
+    networks:
+      - mynetwork
+  rabbitmq:
+    image: 'rabbitmq:3-management'
+    ports:
+      - 5672:5672
+      - 15672:15672
+    networks:
+      - mynetwork
+
+  game-mongodb:
+    image: 'mongo'
+    ports:
+      - 27020:27017
+    networks:
+      - mynetwork
+
+  gameuser-mongodb:
+    image: 'mongo'
+    ports:
+      - 27019:27017
+    networks:
+      - mynetwork
+
+  table-mongodb:
+    image: 'mongo'
+    ports:
+      - 27018:27017
+    networks:
+      - mynetwork
+
+networks:
+  mynetwork:
