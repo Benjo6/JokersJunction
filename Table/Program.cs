@@ -1,5 +1,3 @@
-using JokersJunction.Common.Databases;
-using JokersJunction.Common.Databases.Interfaces;
 using JokersJunction.Shared.Data;
 using JokersJunction.Shared.Models;
 using JokersJunction.Table.Repositories;

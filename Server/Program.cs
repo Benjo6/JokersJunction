@@ -3,12 +3,9 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using JokersJunction.Server.Data;
 using JokersJunction.Server.Hubs;
 
 using JokersJunction.Shared.Models;
-using JokersJunction.Common.Databases.Interfaces;
-using JokersJunction.Common.Databases;
 using System.IdentityModel.Tokens.Jwt;
 using JokersJunction.Shared.Data;
 using JokersJunction.Table.Repositories.Interfaces;

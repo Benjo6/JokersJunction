@@ -1,35 +1,89 @@
 ﻿using JokersJunction.Authentication.Protos;
 using JokersJunction.Common.Controllers;
+using JokersJunction.Shared.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 using LoginRequest = JokersJunction.Shared.Requests.LoginRequest;
 
 namespace JokersJunction.Authentication.Controllers;
 
 [Route("api/auth")]
 [ApiController]
-public class AuthenticationController : GrpcControllerBase<Authorizer.AuthorizerClient>
+public class AuthenticationController : ControllerBase
 {
+    private readonly UserManager<ApplicationUser> _userManager;
+    private readonly IConfiguration _configuration;
+    private readonly SignInManager<ApplicationUser> _signInManager;
+    public AuthenticationController(UserManager<ApplicationUser> userManager, IConfiguration configuration, SignInManager<ApplicationUser> signInManager)
+    {
+        _userManager = userManager;
+        _configuration = configuration;
+        _signInManager = signInManager;
+    }
+
     [HttpPost]
     [Route("login")]
     public async Task<IActionResult> Login(LoginRequest request)
     {
-        var response = await Service.LoginAsync(new() { Password = request.Password, Email = request.Email, RememberMe = request.RememberMe });
-        return Ok(response);
+        var result = await _signInManager.PasswordSignInAsync(request.Email, request.Password, false, false);
+
+        if (!result.Succeeded) return BadRequest(new LoginResponse { Successful = false, Error = "Username and password are invalid." });
+
+        var user = await _userManager.FindByEmailAsync(request.Email);
+        var roles = await _userManager.GetRolesAsync(user ?? throw new InvalidOperationException());
+
+        var claims = new List<Claim>
+        {
+            new(ClaimTypes.Name, request.Email),
+        };
+
+        foreach (var role in roles)
+        {
+            claims.Add(new Claim(ClaimTypes.Role, role));
+        }
+
+        var token = GenerateJwtToken(claims);
+
+        return Ok(new { Successful = true, Token = new JwtSecurityTokenHandler().WriteToken(token) });
     }
 
     [HttpPost]
     [Route("register")]
     public async Task<IActionResult> Register(RegisterRequest request)
     {
-        var response = await Service.RegisterAsync(new() { Email = request.Email, Password = request.Password, ConfirmPassword = request.ConfirmPassword });
-        return Ok(response);
+        var newUser = new ApplicationUser { UserName = request.Email, Email = request.Email };
+
+        var result = await _userManager.CreateAsync(newUser, request.Password);
+
+        if (!result.Succeeded)
+        {
+            var errors = result.Errors.Select(x => x.Description);
+
+            return BadRequest(new RegisterResponse { Successful = false, Errors = { errors } });
+        }
+
+        await _userManager.AddToRoleAsync(newUser, "User");
+        return Ok(new RegisterResponse{ Successful = true });
     }
 
-    //[HttpPost]
-    //[Route("disconnect")]
-    //public async Task<IActionResult> Disconnect(DisconnectRequest request)
-    //{
-    //    var response = await Service.DisconnectAsync(new() { Username = request.Username });
-    //    return Ok(response);
-    //}
+    private JwtSecurityToken GenerateJwtToken(IEnumerable<Claim> claims)
+    {
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JwtSecurityKey"] ?? throw new InvalidOperationException()));
+        var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+        var expiry = DateTime.Now.AddDays(Convert.ToInt32(_configuration["JwtExpiryInDays"]));
+
+        var token = new JwtSecurityToken(
+            _configuration["JwtIssuer"],
+            _configuration["JwtAudience"],
+            claims,
+            expires: expiry,
+            signingCredentials: credentials
+        );
+
+        return token;
+    }
 }

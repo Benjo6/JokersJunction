@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Components.Authorization;
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
 
-builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("https://localhost:2000") });
+builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("http://localhost:2000") });
 
 builder.Services.AddOptions();
 builder.Services.AddBlazoredModal();

@@ -1,5 +1,3 @@
-using JokersJunction.Common.Databases;
-using JokersJunction.Common.Databases.Interfaces;
 using JokersJunction.Shared.Data;
 using JokersJunction.Shared.Models;
 using Microsoft.AspNetCore.Identity;
@@ -32,8 +30,6 @@ builder.Services.AddCors(options => options.AddDefaultPolicy(policy =>
 );
 
 builder.Services.AddJwtAuthentication(builder.Configuration);
-
-builder.Services.AddTransient<IDatabaseService>(sp => new DatabaseService(builder.Configuration.GetConnectionString("MongoConnection")));
 
 builder.Configuration.AddJsonFile("ocelot.json");
 builder.Services.AddOcelot(builder.Configuration);

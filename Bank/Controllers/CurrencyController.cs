@@ -1,7 +1,9 @@
 ﻿using Grpc.Core;
 using JokersJunction.Bank.Protos;
 using JokersJunction.Common.Controllers;
+using JokersJunction.Shared.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace JokersJunction.Bank.Controllers;
@@ -10,56 +12,66 @@ namespace JokersJunction.Bank.Controllers;
 [ApiController]
 public class CurrencyController : GrpcControllerBase<Currency.CurrencyClient>
 {
-    private readonly ILogger<CurrencyController> _logger;
+    private readonly UserManager<ApplicationUser> _userManager;
 
-    public CurrencyController(ILogger<CurrencyController> logger)
+    public CurrencyController(UserManager<ApplicationUser> userManager)
     {
-        _logger = logger;
+        _userManager = userManager;
     }
 
-    [Authorize(Roles = "Admin")]
     [HttpPost("add")]
     public async Task<IActionResult> Add(int amount, string userName)
     {
         try
         {
-            var response = await Service.AddAsync(new AddRequest { UserName = userName, Amount = amount });
-            if (response.Success)
+            var user = await _userManager.FindByNameAsync(userName);
+            if (user == null)
             {
-                return Ok(); // Successful response
+                // User not found
+                return NotFound(new AddResponse { Success = false, ErrorMessage = "User not found" });
             }
-            else
-            {
-                return BadRequest(response.ErrorMessage); // Handle error
-            }
+
+            user.Currency += amount;
+            await _userManager.UpdateAsync(user);
+            return Ok( new AddResponse { Success = true });
         }
-        catch (RpcException ex)
+        catch (Exception ex)
         {
-            _logger.LogError(ex, "Error adding currency");
-            return StatusCode((int)ex.StatusCode, ex.Status.Detail);
+            // Log the exception
+            Console.WriteLine($"Error adding currency: {ex.Message}");
+            return BadRequest(new AddResponse { Success = false, ErrorMessage = $"Error adding currency: {ex.Message}" });
         }
     }
 
-    [Authorize(Roles = "Admin")]
     [HttpPost("remove")]
     public async Task<IActionResult> Remove(int amount, string userName)
     {
         try
         {
-            var response = await Service.RemoveAsync(new RemoveRequest { UserName = userName, Amount = amount });
-            if (response.Success)
+            var user = await _userManager.FindByNameAsync(userName);
+            if (user == null)
             {
-                return Ok(); // Successful response
+                // User not found
+                return NotFound(new RemoveResponse { Success = false, ErrorMessage = "User not found" });
+            }
+
+            if (user.Currency >= amount)
+            {
+                user.Currency -= amount;
+                await _userManager.UpdateAsync(user);
+                return Ok(new RemoveResponse { Success = true });
             }
             else
             {
-                return BadRequest(response.ErrorMessage); // Handle error
+                // Insufficient balance
+                return BadRequest(new RemoveResponse { Success = false, ErrorMessage = "Insufficient balance" });
             }
         }
-        catch (RpcException ex)
+        catch (Exception ex)
         {
-            _logger.LogError(ex, "Error removing currency");
-            return StatusCode((int)ex.StatusCode, ex.Status.Detail);
+            // Log the exception
+            Console.WriteLine($"Error removing currency: {ex.Message}");
+            return BadRequest(new RemoveResponse { Success = false, ErrorMessage = $"Error removing currency: {ex.Message}" });
         }
     }
 
@@ -69,13 +81,15 @@ public class CurrencyController : GrpcControllerBase<Currency.CurrencyClient>
     {
         try
         {
-            var response = await Service.BalanceAsync(new BalanceRequest { UserName = userName });
-            return Ok(response.Balance); // Successful response
+            var user = await _userManager.FindByNameAsync(userName);
+            var balance = user?.Currency ?? 0;
+            return Ok(new BalanceResponse { Balance = balance });
         }
-        catch (RpcException ex)
+        catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting balance");
-            return StatusCode((int)ex.StatusCode, ex.Status.Detail);
+            // Log the exception
+            Console.WriteLine($"Error getting balance: {ex.Message}");
+            return BadRequest(new BalanceResponse { Balance = 0, ErrorMessage = $"Error getting balance: {ex.Message}" });
         }
     }
 }

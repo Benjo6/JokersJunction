@@ -4,11 +4,11 @@
       "UpstreamPathTemplate": "/gateway/player-note/{userId}",
       "UpstreamHttpMethod": [ "Get", "Post" ],
       "DownstreamPathTemplate": "/api/player-note/{userId}",
-      "DownstreamScheme": "https",
+      "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
-          "Port": 5002
+          "Host": "player-note",
+          "Port": 80
         }
       ]
     },
@@ -16,11 +16,11 @@
       "UpstreamPathTemplate": "/gateway/player-note/by-name/{userId}/{notePlayerName}",
       "UpstreamHttpMethod": [ "Get" ],
       "DownstreamPathTemplate": "/api/player-note/by-name/{userId}/{notePlayerName}",
-      "DownstreamScheme": "https",
+      "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
-          "Port": 5002
+          "Host": "player-note",
+          "Port": 80
         }
       ]
     },
@@ -28,11 +28,11 @@
       "UpstreamPathTemplate": "/gateway/player-note/{userId}/{notedPlayerName}",
       "UpstreamHttpMethod": [ "Delete" ],
       "DownstreamPathTemplate": "/gateway/player-note/{userId}/{notedPlayerName}",
-      "DownstreamScheme": "https",
+      "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
-          "Port": 5002
+          "Host": "player-note",
+          "Port": 80
         }
       ]
     },
@@ -40,11 +40,11 @@
       "UpstreamPathTemplate": "/gateway/player-note",
       "UpstreamHttpMethod": [ "Post" ],
       "DownstreamPathTemplate": "/api/player-note",
-      "DownstreamScheme": "https",
+      "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
-          "Port": 5002
+          "Host": "player-note",
+          "Port": 80
         }
       ]
     },
@@ -52,11 +52,11 @@
       "UpstreamPathTemplate": "/gateway/p-table/delete/{tableId}",
       "UpstreamHttpMethod": [ "Get" ],
       "DownstreamPathTemplate": "/api/p-table/delete/{tableId}",
-      "DownstreamScheme": "https",
+      "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
-          "Port": 5001
+          "Host": "table",
+          "Port": 80
         }
       ]
     },
@@ -64,11 +64,11 @@
       "UpstreamPathTemplate": "/gateway/b-table/delete/{tableId}",
       "UpstreamHttpMethod": [ "Get" ],
       "DownstreamPathTemplate": "/api/b-table/delete/{tableId}",
-      "DownstreamScheme": "https",
+      "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
-          "Port": 5001
+          "Host": "table",
+          "Port": 80
         }
       ]
     },
@@ -76,11 +76,11 @@
       "UpstreamPathTemplate": "/gateway/p-table/create",
       "UpstreamHttpMethod": [ "Get" ],
       "DownstreamPathTemplate": "/api/p-table/create",
-      "DownstreamScheme": "https",
+      "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
-          "Port": 5001
+          "Host": "table",
+          "Port": 80
         }
       ]
     },
@@ -88,11 +88,11 @@
       "UpstreamPathTemplate": "/gateway/b-table/create",
       "UpstreamHttpMethod": [ "Get" ],
       "DownstreamPathTemplate": "/api/b-table/create",
-      "DownstreamScheme": "https",
+      "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
-          "Port": 5001
+          "Host": "table",
+          "Port": 80
         }
       ]
     },
@@ -103,8 +103,8 @@
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
-          "Port": 5001
+          "Host": "table",
+          "Port": 80
         }
       ]
     },
@@ -112,11 +112,11 @@
       "UpstreamPathTemplate": "/gateway/b-table/{id}",
       "UpstreamHttpMethod": [ "Get" ],
       "DownstreamPathTemplate": "/api/p-table/{id}",
-      "DownstreamScheme": "https",
+      "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
-          "Port": 5001
+          "Host": "table",
+          "Port": 80
         }
       ]
     },
@@ -125,11 +125,11 @@
       "UpstreamPathTemplate": "/gateway/p-table",
       "UpstreamHttpMethod": [ "Get" ],
       "DownstreamPathTemplate": "/api/p-table",
-      "DownstreamScheme": "https",
+      "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
-          "Port": 5001
+          "Host": "table",
+          "Port": 80
         }
       ]
     },
@@ -138,11 +138,11 @@
       "UpstreamPathTemplate": "/gateway/b-table",
       "UpstreamHttpMethod": [ "Get" ],
       "DownstreamPathTemplate": "/api/b-table",
-      "DownstreamScheme": "https",
+      "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
-          "Port": 5001
+          "Host": "table",
+          "Port": 80
         }
       ]
     },
@@ -153,8 +153,8 @@
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
-          "Port": 7158
+          "Host": "bank",
+          "Port": 80
         }
       ]
     },
@@ -162,11 +162,11 @@
       "UpstreamPathTemplate": "/gateway/currency/remove",
       "UpstreamHttpMethod": [ "Post" ],
       "DownstreamPathTemplate": "/api/currency/remove",
-      "DownstreamScheme": "https",
+      "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
-          "Port": 7158
+          "Host": "bank",
+          "Port": 80
         }
       ]
     },
@@ -174,11 +174,11 @@
       "UpstreamPathTemplate": "/gateway/currency/add",
       "UpstreamHttpMethod": [ "Post" ],
       "DownstreamPathTemplate": "/api/currency/add",
-      "DownstreamScheme": "https",
+      "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
-          "Port": 7158
+          "Host": "bank",
+          "Port": 80
         }
       ]
     },
@@ -186,11 +186,11 @@
       "UpstreamPathTemplate": "/gateway/auth/register",
       "UpstreamHttpMethod": [ "Post" ],
       "DownstreamPathTemplate": "/api/auth/register",
-      "DownstreamScheme": "https",
+      "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
-          "Port": 7017
+          "Host": "authentication",
+          "Port": 80
         }
       ]
     },
@@ -198,11 +198,11 @@
       "UpstreamPathTemplate": "/gateway/auth/login",
       "UpstreamHttpMethod": [ "Post" ],
       "DownstreamPathTemplate": "/api/auth/login",
-      "DownstreamScheme": "https",
+      "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
-          "Port": 7017
+          "Host": "authentication",
+          "Port": 80
         }
       ]
     }
