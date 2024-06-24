@@ -90,17 +90,5 @@ services:
       - 27018:27017
     networks:
       - mynetwork
-  database:
-    image: mcr.microsoft.com/mssql/server
-    environment:
-      ACCEPT_EULA: 'Y'
-      MSSQL_SA_PASSWORD: '<YourStrong!Passw0rd>'
-    ports:
-      - 1433:1433
-    volumes:
-      - C:/Users/bnc/source/repos/JokersJunction:/var/opt/mssql/data
-    networks:
-      - mynetwork
-
 networks:
   mynetwork:
