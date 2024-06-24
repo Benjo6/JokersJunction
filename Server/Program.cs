@@ -22,7 +22,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddAutoMapper(typeof(Program));
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DBConnection")));
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DBConnection")));
 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 {
@@ -105,11 +105,8 @@ app.Use(async (context, next) =>
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.UseEndpoints(endpoints =>
-{
-    endpoints.MapControllers();
-    endpoints.MapHub<GameHub>("/gameHub");
-    endpoints.MapFallbackToFile("index.html");
-});
+app.MapControllers();
+app.MapHub<GameHub>("/gameHub");
+app.MapFallbackToFile("index.html");
 
 app.Run();
